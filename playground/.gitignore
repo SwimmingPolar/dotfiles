@@ -1,0 +1,25 @@
+# Default ignores
+.DS_Store
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+
+# React ignores
+/.pnp
+.pnp.js
+
+# Node.js ignores
+/lib-cov
+/coverage
+.nyc_output
+/.nyc_output
+/.node_repl_history
+/logs
+/build
+/dist
+/.pnp.js
+
+# TypeScript ignores
+*.tsbuildinfo
