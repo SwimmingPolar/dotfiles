@@ -1,64 +1,24 @@
 #!/bin/bash
 
-# Exit on first error
-set -e
+# Preserve path of the script when executed to access .ignore file
+# .ignore and backup script should be placed at the same directory
+script_path=$(dirname $(readlink -f $(basename "$0")))
+
+# Add error handler
+source "${script_path}/modules/errorHandler.sh"
+# Check github credential
+source "${script_path}/modules/gitAuth.sh"
 
 # List of files or directories to be backup
 list_of_directories=(
   /home/swimmingpolar/scripts
 )
 
-exit_handler() {
-    # Preserve error code before next command
-    exit_status=$?
-
-    # Cleanup
-    cd "$workDir"
-    rm -f "$compressedFile"
-    rm -rf "$repoDir"
-    rm -rf .vim
-
-    # Stop directing stdout
-    exec >&-
-
-    if [ $exit_status -ne 0 ]; then
-      log_message="Script exited with error code $exit_status"
-      mkdir -p ~/logs
-      echo "$log_message" >> ~/logs/backup.log
-    fi
-}
-
-trap exit_handler EXIT ERR
-
-# Start directing stdout to /dev/null
-exec >/dev/null
-
-# check for github cli and install
-dpkg -l gh | grep gh
-if [ $? -ne 0 ]; then
-  echo "- Install github cli"
-  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-  sudo apt-add-repository https://cli.github.com/packages
-  sudo apt update
-  sudo apt -y install gh
-fi
-
-# check git hub cli auth status
-gh auth status
-if [ $? -ne 0 ]; then
-  gh auth login
-fi
-echo "- Github credential check"
-
 # Define the working and destination directories
 workDir=~/_temp
 repoDir=_ubuntu
 repoURL="https://github.com/SwimmingPolar/_ubuntu.git"
 compressedFile="vim.tar.gz"
-
-# Preserve path of the script when executed to access .ignore file
-# .ignore and backup script should be placed at the same directory
-script_path=$(dirname $(readlink -f $(basename "$0")))
 
 # Go to the working directory and compress the ~/.vim directory
 mkdir -p "$workDir"
