@@ -71,6 +71,6 @@ cp $files_dir ./
 
 # Commit and push to remote repository
 git add .
-git commit -m "Update backup"
+git commit -m "$(date +'%Y-%m-%d') commit by scheduler"
 git push origin main
 
