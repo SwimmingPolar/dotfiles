@@ -6,7 +6,6 @@ set -e
 # List of files or directories to be backup
 list_of_directories=(
   /home/swimmingpolar/scripts
-  /home/swimmingpolar/playground
 )
 
 exit_handler() {
@@ -53,8 +52,8 @@ echo "- Github credential check"
 
 # Define the working and destination directories
 workDir=~/_temp
-repoDir=ubuntu
-repoURL="https://github.com/SwimmingPolar/ubuntu.git"
+repoDir=_ubuntu
+repoURL="https://github.com/SwimmingPolar/_ubuntu.git"
 compressedFile="vim.tar.gz"
 
 # Preserve path of the script when executed to access .ignore file
@@ -105,8 +104,8 @@ do
   rsync -av --delete --exclude-from "${script_path}/.ignore" $target ./
 done
 
+# Commit and push to remote repository
 git add .
 git commit -m "Update backup"
 git push origin main
-echo "Commit and push to remote repository"
 
