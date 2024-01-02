@@ -85,17 +85,14 @@ if [ ! -d "$repoDir" ]; then
     echo "- Clone remote repository"
 fi
 
-# Ensure the branch is main and pull the latest changes
+# CD into the repository directory
 cd "$repoDir"
-git checkout main
-git pull origin main
-echo "- Checkout and pull main branch"
-
-# Copy the compressed file to the ubuntu directory and push to GitHub
-cp "../$compressedFile" .
 
 # Delete all fiels in the repository
 rm -rf *
+
+# Copy the compressed file to the ubuntu directory and push to GitHub
+cp "../$compressedFile" .
 
 if [ -f "$script_path" ]; then
   echo "Without .ignore file, node_modules can be copied"
