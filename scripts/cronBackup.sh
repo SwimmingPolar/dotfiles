@@ -14,6 +14,7 @@ list_of_directories=(
   ~/.oh-my-bash
   ~/scripts
   ~/.vim
+  ~/.config/nvim
 )
 # List of files to backup
 list_of_files=(
