@@ -9,36 +9,35 @@ source "${script_path}/modules/errorHandler.sh"
 # Check github credential
 source "${script_path}/modules/gitAuth.sh"
 
-# List of files or directories to be backup
+# List of directories to backup
 list_of_directories=(
-  /home/swimmingpolar/scripts
+  ~/.oh-my-bash
+  ~/scripts
+  ~/.vim
 )
-# Files under this directory will be copied to root directory of repo
-files_dir=~/._ubuntu/*
+# List of files to backup
+list_of_files=(
+  ~/.bashrc
+  ~/.gitconfig
+)
+# Files under this directory will be copied to root directory of the repo
+files_dir=~/._ubuntu
 
 # Define the working and destination directories
 workDir=~/_temp
 repoDir=_ubuntu
 repoURL="https://github.com/SwimmingPolar/_ubuntu.git"
-compressedFile="vim.tar.gz"
 
-# Go to the working directory and compress the ~/.vim directory
+cleanup() {
+  rm -rf "$workDir/$repoDir"
+}
+
+trap cleanup EXIT
+
+# Go to the working directory 
 mkdir -p "$workDir"
 cd "$workDir"
 echo "- Move to $workDir"
-
-cp -r ~/.vim "./"
-echo "- Copy ~/.vim to ./"
-
-# Remove .netrwhist if it exists (user specific file)
-if [ -f .vim/.netrwhist ]; then
-    rm .vim/.netrwhist
-    echo "- Remove .netrwhist file"
-fi
-
-# Compress .vim directory
-tar -czf "$compressedFile" .vim
-echo "- Compress .vim directory"
 
 # Check for ubuntu directory and clone if it doesn't exist
 if [ ! -d "$repoDir" ]; then
@@ -52,22 +51,25 @@ cd "$repoDir"
 # Delete all fiels in the repository
 rm -rf *
 
-# Copy the compressed file to the ubuntu directory and push to GitHub
-cp "../$compressedFile" ./
-
 if [ -f "$script_path" ]; then
-  echo "Without .ignore file, node_modules can be copied"
+  echo "Without .ignore file, node_modules can be included in backup"
   exit 10
 fi
 
-# Copy any other directories or files listed at the top
-for target in "${list_of_directories[@]}"
+# Copy directories
+for directory in "${list_of_directories[@]}"
 do
-  rsync -av --delete --exclude-from "${script_path}/.ignore" $target ./
+  rsync -av --delete --exclude-from "${script_path}/.ignore" $directory ./
 done
 
-# Copy all files from ~/._ubuntu to the root of the repo
-cp $files_dir ./
+# Copy files
+for file in "${list_of_files[@]}"
+do
+  cp $file ./
+done
+
+# Copy all from ~/._ubuntu
+cp "$files_dir"/* ./
 
 # Commit and push to remote repository
 git add .
