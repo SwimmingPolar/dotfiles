@@ -11,5 +11,6 @@
 - [x] neovim + lazyvim plugins
 - [ ] organize nvim plguins and their basic usages
 
-**etc**
+**bash**
 - [x] custom bash prompt
+- [ ] see bash plugins usages and enable
