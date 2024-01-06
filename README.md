@@ -3,7 +3,7 @@
 - [ ] add to cron for regular update
 
 **sync ubuntu packages**
-- [ ] manifest apps and add as dotfiles
+- [ ] write app manifest and add dotfile
 - [ ] write script that install all packages for automation
 
 **vim**
