@@ -10,6 +10,7 @@
 - [x] <strike>vimrc customization</strike>
 - [x] neovim + lazyvim plugins
 - [ ] organize nvim plguins and their basic usages
+- [ ] add telescope extensions
 
 **bash**
 - [x] custom bash prompt
