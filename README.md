@@ -1,8 +1,8 @@
-개발 프로세스에 관련이 있다기 보다는 개발 환경에서 사용되는<br/>
-개인 도구들을 어디까지, 어떻게, 무엇을 사용해서 커스터마이징 가능한지<br/>
-정리하고 설정 파일을 정리하는 중
+A journey to setting up my own personalized development environment<br/>
+- list of cli tools
+- mainly about themes
 
-### 보통 개발 환경에 필요한 도구
+### Terminal to Editor
 ```js
 +-------------------------------------------------+   +-------------------------------------------------+
 |                 Terminal                        |   | Terminal Emulator                               |
@@ -20,20 +20,29 @@
 
 ```
 
-- Terminal Emulator
-  - UI (font, color)
-- Shell
-  - Prompt
-    - UI (color)
-    - formatted text for various situations
-  - Utilities
+- Terminal Emulator: [windows terminal](https://github.com/microsoft/terminal)
+- Shell: zsh
+  - 
+  - Prompt: [starship](https://github.com/starship/starship)
+  - Plugins:
+    - Plugin manager/lib: [oh-my-zsh](https://github.com/ohmybash/oh-my-bash)
+    - PluginA
+    - PluginB
+    - ...
+  - Terminal/Shell Management: tmux (opt out yet)
+  - LLM AI: [AI Shell](https://github.com/BuilderIO/ai-shell)
+- Editor: [neovim](https://github.com/neovim/neovim)
+  - Plugins:
+    - Plugin manager/lib: [lazy.nvim](https://github.com/folke/lazy.nvim)
+    - PluginA
+    - PluginB
+    - PluginC
+    - ...
     - Libs/plugins/Aliases
       - search
       - suggestions
       - predefined aliases
     - Completion
-  - Terminal/Shell Management
-  - LLM AI
 - Editor
   - UI (Font, Theme)
   - Search files
@@ -50,6 +59,13 @@
       - Navigation
   - Plugins
     - 줜나 많음
+
+- command line suggestion
+- command line auto complete
+- search files
+- autojump
+- fasd
+- KKKKJ
 
 **sync dotfiles** ([chezmoi](https://github.com/twpayne/chezmoi))
 - [ ] write script that syncs on config diff
