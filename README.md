@@ -20,20 +20,21 @@ A journey to setting up my own personalized development environment<br/>
 
 ```
 
-- Terminal Emulator: [windows terminal](https://github.com/microsoft/terminal)
-- Shell: zsh
-  - 
-  - Prompt: [starship](https://github.com/starship/starship)
-  - Plugins:
-    - Plugin manager/lib: [oh-my-zsh](https://github.com/ohmybash/oh-my-bash)
-    - PluginA
-    - PluginB
-    - ...
-  - Terminal/Shell Management: tmux (opt out yet)
-  - LLM AI: [AI Shell](https://github.com/BuilderIO/ai-shell)
-- Editor: [neovim](https://github.com/neovim/neovim)
-  - Plugins:
-    - Plugin manager/lib: [lazy.nvim](https://github.com/folke/lazy.nvim)
+- terminal emulator: [windows terminal](https://github.com/microsoft/terminal)
+- shell: zsh
+  - prompt: [starship](https://github.com/starship/starship)
+  - plugins
+    - default configuration: [oh-my-zsh](https://github.com/ohmybash/oh-my-bash)
+    - fd
+    - fzf 
+    - https://mike.place/2017/fzf-fd/
+    - editing...
+  - terminal/shell management: tmux (opt out yet)
+  - CLI AI: [zsh_codex](https://github.com/tom-doerr/zsh_codex)
+    - alternative: [AI Shell](https://github.com/BuilderIO/ai-shell)
+- editor: [LazyVim(NeoVim Distro)](https://github.com/LazyVim/LazyVim)
+  - plugins
+    - plugin manager: [lazy.nvim](https://github.com/folke/lazy.nvim)
     - PluginA
     - PluginB
     - PluginC
