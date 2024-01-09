@@ -29,30 +29,34 @@ A journey to setting up my own personalized development environment<br/>
     - search files [(fd+fzf)](https://mike.place/2017/fzf-fd/)
     - [zsh-completions](https://github.com/zsh-users/zsh-completions)
     - [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)
-    - editing...
+    - adding...
   - terminal/shell management: tmux (opt out yet)
-  - CLI AI: [zsh_codex](https://github.com/tom-doerr/zsh_codex)
-    - alternative: [AI Shell](https://github.com/BuilderIO/ai-shell)
+  - CLI AI: [zsh_codex](https://github.com/tom-doerr/zsh_codex) (alternative: [AI Shell](https://github.com/BuilderIO/ai-shell))
 - **editor**: [LazyVim(NeoVim Distro)](https://github.com/LazyVim/LazyVim)
   - plugins
     - plugin manager: [lazy.nvim](https://github.com/folke/lazy.nvim)
-    - multi cursor
-    - PluginB
-    - PluginC
-    - ...
-    - Libs/plugins/Aliases
-      - search
-      - suggestions
-      - predefined aliases
+    - multi cursor (opt out yet)
+    - adding...
 
-
-
-  
 - using .vimrc on nvim(neovim)'s init.lua
 - image and theme colors not matching (termguicolors)
 - (host browser inside wsl)[https://superuser.com/questions/1262977/open-browser-in-host-system-from-windows-subsystem-for-linux]
 
-
+```js
++---------------+-------------------+-------------------------+----------------+-------------------+
+|               |      Phase 1      |        Phase 2          |    Phase 3     |     Phase 4       |
++---------------+-------------------+-------------------------+----------------+-------------------+
+|               |   List Creation   | Theme, Plugin Selection |  Installation  |   Dotfiles Sync   |
++---------------+-------------------+-------------------------+----------------+-------------------+
+|   Terminal    |                   |                         |                |                   |
++---------------+-------------------+-------------------------+----------------+-------------------+
+|     Shell     |                   |                         |                |                   |
++---------------+-------------------+-------------------------+----------------+-------------------+
+|    Prompt     |                   |                         |                |                   |
++---------------+-------------------+-------------------------+----------------+-------------------+
+|    Editor     |                   |                         |                |                   |
++---------------+-------------------+-------------------------+----------------+-------------------+
+```
 
 **sync dotfiles** ([chezmoi](https://github.com/twpayne/chezmoi))
 - [ ] write script that syncs on config diff
@@ -71,3 +75,12 @@ A journey to setting up my own personalized development environment<br/>
 **bash**
 - [x] custom bash prompt
 - [ ] see bash plugins usages and enable
+
+### Reference
+**nvim theme**
+- [nvchad](https://github.com/NvChad)
+- [nvchad-themes](https://github.com/NvChad/base46)
+  
+**nvim plugins starter packs**
+- [nvim-lua/kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim)
+- [startup-nvim/startup.nvim](https://github.com/startup-nvim/startup.nvim)
