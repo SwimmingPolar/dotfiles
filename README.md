@@ -28,6 +28,7 @@ A journey to setting up my own personalized development environment<br/>
     - fd
     - fzf 
     - https://mike.place/2017/fzf-fd/
+    - 
     - editing...
   - terminal/shell management: tmux (opt out yet)
   - CLI AI: [zsh_codex](https://github.com/tom-doerr/zsh_codex)
