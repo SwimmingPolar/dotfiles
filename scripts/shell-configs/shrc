@@ -1,0 +1,46 @@
+ZSHRC=~/.zshrc
+BSHRC=~/.bashrc
+
+# Uncomment the following line to enable command auto-correction.
+ENABLE_CORRECTION="true"
+
+# Uncomment the following line if pasting URLs and other text is messed up.
+# DISABLE_MAGIC_FUNCTIONS="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# You can set one of the optional three formats:
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+HIST_STAMPS="yyyy-mm-dd"
+
+# User configuration
+export MANPATH="/usr/local/man:$MANPATH"
+
+# You may need to manually set your language environment
+export LANG=en_US.UTF-8
+
+# Preferred editor for local and remote sessions
+if [[ -n $SSH_CONNECTION ]]; then
+	export EDITOR='vim'
+else
+	export EDITOR='nvim'
+fi
+
+# Set personal aliases, overriding those provided by oh-my-zsh libs,
+# plugins, and themes. Aliases can be placed here, though oh-my-zsh
+# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+alias cat="batcat"
+alias bat="batcat"
+alias l="ls -l"
+alias nvim="/snap/bin/nvim"
+alias zshrc="$EDITOR $ZSHRC"
+alias srcz="source $ZSHRC"
+alias bashrc="$EDITOR $BSHRC"
+alias srcb="source $BSHRC"
+alias shrc="$EDITOR ~/.shrc"
+
+set -o vi
+
+export BROWSER=wslview
