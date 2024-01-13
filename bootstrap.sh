@@ -47,7 +47,7 @@ trap exitOnError ERR
 stty -echo
 
 # Load ui functions (message_box, message_box_clear)
-source "$BASE_DIR/modules/ui"
+source "$BASE_DIR/scripts/modules/ui"
 
 # Show spinner for instead of stdout messages
 spinner() {
@@ -133,22 +133,27 @@ execute_installation() {
 	set +e
 }
 
+#
 # Backup before making any changes
-DOTFILES_PATH="$BASE_DIR/.."
+#
+DOTFILES_PATH="$BASE_DIR"
 # Define an associative array with source and destination pairs
-files_to_copy=(".bashrc" ".zshrc" ".shrc" ".vimrc" "starship.toml" ".oh-my-bash" ".oh-my-zsh")
-copy_with_backup() {
+files_to_copy=(".bashrc" ".zshrc" ".shrc" ".vimrc" ".starship.toml" ".oh-my-bash" ".oh-my-zsh")
+backup_configs() {
     local file="$1"
     # Make a copy of original config file,
     cp -rf "$HOME_DIR/$file" "$DOTFILES_BACKUP/$file"
     # Remove original config file
     rm -rf "$HOME_DIR/$file"
+}
+# Later, it will be called to move configs to override defaults
+copy_configs() {
     # Copy from dotfiles
     cp -rf "$DOTFILES_PATH/$file" "$HOME_DIR/$file"
 }
-# Iterate over the files and copy them
+# Iterate over the files and make backups
 for file in "${files_to_copy[@]}"; do
-    copy_with_backup "$file" >/dev/null 2>&1 || true
+    backup_configs "$file" >/dev/null 2>&1 || true
 done
 
 # Function to install all necessary packages at once
@@ -160,6 +165,7 @@ initBootstrap() {
 	apt-get install -y git curl wget
 	apt-get install -y ripgrep unzip vim apt
 	apt install software-properties-common --yes
+	apt install python3 python3-pip --yes
 	export PATH="/snap/bin:$PATH"
 	systemctl restart snapd.seeded.service
 	systemctl restart snapd.service
@@ -176,7 +182,7 @@ execute_installation \
 # Install oh-my-bash
 mv "$HOME_DIR/.oh-my-bash" "$DOTFILES_BACKUP/" >/dev/null 2>&1 || true
 execute_installation \
-'bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" --unattended' \
+'sudo -u $SUDO_USER bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" --unattended' \
 "Installing oh-my-bash for fallback" \
 "OMB Installation Completed" \
 "installing omb 🚨 "
@@ -187,11 +193,13 @@ execute_installation \
 "Installing zsh" \
 "zsh Installation Completed" \
 "installing zsh 🎈 "
+# Change default shell to zsh
+chsh -s $(which zsh)
 
 # Install oh-my-zsh
 mv "$HOME_DIR/.oh-my-zsh" "$DOTFILES_BACKUP/" >/dev/null 2>&1 || true
 execute_installation \
-'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended' \
+'sudo -u $SUDO_USER sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended' \
 "Installing oh-my-zsh" \
 "OMZ Installation Completed" \
 "installing oh-my-zsh 🎨 "
@@ -237,6 +245,13 @@ execute_installation \
 "installing starship 🚀 "
 ln -s "$HOME_DIR/.starship.toml" "$HOME_DIR/.config/starship.toml" >/dev/null 2>>$LOG_FILE
 
+#
+# Iterate over the files and make backups
+#
+for file in "${files_to_copy[@]}"; do
+    copy_configs "$file" >/dev/null 2>&1 || true
+done
+
 # Install wslu for wsl utilities
 # This is to use host browser instead of wsl browser.
 {
@@ -250,10 +265,19 @@ echo "export BROWSER=wslview
 export PATH=/snap/bin:/$HOME_DIR/.local/bin:$PATH" >> "$HOME_DIR/.shrc"
 
 # Ignore if it errors out or not. It's for fun.
-sudo snap install lolcat >/dev/null 2>&1 & spinner "" $! || true
+snap install lolcat >/dev/null 2>&1 & spinner "" $! || true
 
 {
-echo -en "\n\n\n"
-message_box_clear "Bootstrap Successful" 
-echo -e "\nrestart the terminal\n"
+# Copy figlet directory to local home directory
+mkdir -p "$HOME_DIR/.local/lib/"
+cp -r "$BASE_DIR/figlet" "$HOME_DIR/.local/lib/"
+
+# Print welcome figlet
+FIGLET_DIR="$HOME_DIR/.local/lib/figlet"
+"$FIGLET_DIR/print.sh"
+
+# Print bootstrap successful message box
+echo ""
+message_box "Bootstrap Successful" 
+echo ""
 } | lolcat

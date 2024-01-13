@@ -1,3 +1,6 @@
+# Print welcome screen
+"$HOME/.local/bin/figlet/print.sh"
+
 ZSHRC=~/.zshrc
 BSHRC=~/.bashrc
 

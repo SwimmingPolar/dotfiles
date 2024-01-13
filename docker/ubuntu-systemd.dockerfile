@@ -7,6 +7,8 @@ RUN apt-get install -y apt-utils
 RUN apt-get install -y snapd 
 RUN apt-get install -y git curl wget
 RUN apt-get install -y ripgrep unzip vim apt
+RUN apt install software-properties-common --yes
+RUN apt install python3 python3-pip --yes
 
 RUN adduser --disabled-password --gecos '' swimmingpolar \
 && echo "swimmingpolar:rkskekfk1" | chpasswd

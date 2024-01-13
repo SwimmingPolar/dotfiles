@@ -2,7 +2,7 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="$HOME/.config/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 
 # update automatically without asking
 zstyle ':omz:update' mode auto
