@@ -85,7 +85,7 @@ message_box_clear() {
   wrap_message "clear" "$1" "$2" "$3"
 }
 
-message_box "Remember to always quote your variables in Bash."
+#message_box "Remember to always quote your variables in Bash."
 #message_box "hello world!"
 #message_box "Welcome to the Bash scripting tutorial!"
 #message_box "This is a test message."
@@ -93,6 +93,6 @@ message_box "Remember to always quote your variables in Bash."
 #echo ""
 #message_box_clear "User settings have been reset."
 #message_box_clear "Updating database records..."
-message_box_clear "System reboot required."
+#message_box_clear "System reboot required."
 #message_box_clear "Installation complete."
 #message_box_clear "Error: File not found."

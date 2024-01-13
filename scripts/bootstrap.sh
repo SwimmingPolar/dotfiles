@@ -16,36 +16,34 @@ if [[ "$(ps --no-headers -o comm 1)" != "systemd" ]]; then
 	exit 20
 fi
 
-# Make sure all variales are predefined.
-set -u
-
 # Path variables
 HOME_DIR=$(getent passwd "$SUDO_USER" | cut -d: -f6)
-BASE_DIR=$(dirname $(readlink -f $0))
-LOG_FILE="$BASE_DIR/bootstrap.log"
-SHELL_CONFIGS_BACKUP="$HOME_DIR/.config/.shell-configs-backup"
-# Make backup directory for configs
-mkdir -p "$SHELL_CONFIGS_BACKUP"
+BASE_DIR=$(dirname $(readlink -f "$0"))
+LOG_FILE="$BASE_DIR/.bootstrap.log"
+DOTFILES_BACKUP="$HOME_DIR/.config/.dotfiles.backups"
+# Make a backup directory for configs
+mkdir -p "$DOTFILES_BACKUP"
 
 shutdown() {
 	# enable terminal echo
 	stty echo
 	# reset cursor
 	tput cnorm 
+	# remove log file
+	rm -f "$LOG_FILE"
 }
 trap shutdown EXIT
 exitOnError() {
 	# enable terminal echo
 	stty echo
 	cat "$LOG_FILE"
+	# remove log file
 	rm -f "$LOG_FILE"
 	exit 1
 }
 trap exitOnError ERR
 
-# Disable terminal echo (cr)
-# When enter is pressed, last command line is copied.
-# This prevents the described behavior.
+# Disable terminal echo
 stty -echo
 
 # Load ui functions (message_box, message_box_clear)
@@ -58,10 +56,10 @@ spinner() {
 	local LC_CTYPE=C
 
 	# Process Id of the previous running command
-	local pid=$!
 	local spin='-\|/'
 	local charwidth=1
 	local message=${1:-"processing..."}
+	local pid=$2
 
 	local i=0
 	# Cursor will be hidden 
@@ -108,16 +106,13 @@ execute_installation() {
 	# show message box with text
 	message_box "$start_msg"
 
-	# If command has curl, shell will invoke it after downloading
-	if [[ $command == *"curl"* ]]; then
-	    bash -c "$command" "--unattended" "--unattended" >/dev/null 2>>"$LOG_FILE" &
-	# Otherwise, run the command as it is
-	else
-	    $command >/dev/null 2>>"$LOG_FILE" &
-	fi
+	# execute command
+	eval "$command" >/dev/null 2>>"$LOG_FILE" &
+
+	pid=$!
 
 	# Show spinner 
-	pid=spinner "$loading_msg"
+	spinner "$loading_msg" $pid
 	# Get exit code of command and
 	# check for any error
 	wait $pid
@@ -138,7 +133,25 @@ execute_installation() {
 	set +e
 }
 
-# Install all necessary packages
+# Backup before making any changes
+DOTFILES_PATH="$BASE_DIR/.."
+# Define an associative array with source and destination pairs
+files_to_copy=(".bashrc" ".zshrc" ".shrc" ".vimrc" "starship.toml" ".oh-my-bash" ".oh-my-zsh")
+copy_with_backup() {
+    local file="$1"
+    # Make a copy of original config file,
+    cp -rf "$HOME_DIR/$file" "$DOTFILES_BACKUP/$file"
+    # Remove original config file
+    rm -rf "$HOME_DIR/$file"
+    # Copy from dotfiles
+    cp -rf "$DOTFILES_PATH/$file" "$HOME_DIR/$file"
+}
+# Iterate over the files and copy them
+for file in "${files_to_copy[@]}"; do
+    copy_with_backup "$file" >/dev/null 2>&1 || true
+done
+
+# Function to install all necessary packages at once
 initBootstrap() {
 	apt-get update
 	apt-get install -y dialog whiptail
@@ -146,6 +159,7 @@ initBootstrap() {
 	apt-get install -y snapd 
 	apt-get install -y git curl wget
 	apt-get install -y ripgrep unzip vim apt
+	apt install software-properties-common --yes
 	export PATH="/snap/bin:$PATH"
 	systemctl restart snapd.seeded.service
 	systemctl restart snapd.service
@@ -155,123 +169,91 @@ initBootstrap() {
 # Install dependencies
 execute_installation \
 "initBootstrap" \
-"installing dependencies..." \
-"Dependencies Installed"
+"Installing dependencies..." \
+"Dependencies Installed" \
+"installing dependencies 📚 "
 
 # Install oh-my-bash
-mv "$HOME_DIR/.oh-my-bash" "$SHELL_CONFIGS_BACKUP/" 2>&1 >/dev/null
+mv "$HOME_DIR/.oh-my-bash" "$DOTFILES_BACKUP/" >/dev/null 2>&1 || true
 execute_installation \
-'curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh'
+'bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" --unattended' \
 "Installing oh-my-bash for fallback" \
 "OMB Installation Completed" \
-"installing omb..."
+"installing omb 🚨 "
 
 # Install zsh
 execute_installation \
 'apt install zsh --yes' \
 "Installing zsh" \
 "zsh Installation Completed" \
-"installing zsh..."
+"installing zsh 🎈 "
 
 # Install oh-my-zsh
-mv "$HOME_DIR/.oh-my-zsh" "$SHELL_CONFIGS_BACKUP/" 2>&1 >/dev/null
+mv "$HOME_DIR/.oh-my-zsh" "$DOTFILES_BACKUP/" >/dev/null 2>&1 || true
 execute_installation \
-'curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh' \
+'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended' \
 "Installing oh-my-zsh" \
 "OMZ Installation Completed" \
-"installing oh-my-zsh..."
+"installing oh-my-zsh 🎨 "
 
 # Install nvim
 execute_installation \
 'snap install nvim --classic' \
 "Installing nvim" \
 "Neovim Installation Completed" \
-"installing nvim..."
+"installing nvim 🪄 "
 mkdir -p "$HOME_DIR/.local/bin/"
 ln -s /snap/bin/nvim "$HOME_DIR/.local/bin/" >/dev/null 2>>$LOG_FILE
 
 # Backup before installing nvim theme
 {
-NVIM_BACKUP="$SHELL_CONFIGS_BACKUP/nvim/"
+NVIM_BACKUP="$DOTFILES_BACKUP/nvim/"
 mkdir -p "$NVIM_BACKUP"
 mv "$HOME_DIR/.config/nvim" "$NVIM_BACKUP"
 mv "$HOME_DIR/.local/share/nvim" "$NVIM_BACKUP"
 mv "$HOME_DIR/.local/state/nvim" "$NVIM_BACKUP"
 mv "$HOME_DIR/.cache/nvim" "$NVIM_BACKUP"
-} >/dev/null 2>&1
+} >/dev/null 2>&1 || true
 
 # Install NvChad
 execute_installation \
 "git clone https://github.com/NvChad/NvChad $HOME_DIR/.config/nvim --depth 1" \
 "Installing NvChad" \
 "NvChad Installation Completed" \
-"installing NvChad..."
+"installing NvChad 🤨 "
 
 # Install chezmoi
 execute_installation \
 'snap install chezmoi --classic' \
 "Installing chezmoi" \
 "chezmoi Installation Completed" \
-"installing chezmoi..."
+"installing chezmoi 🏠 "
 
 # Install starship
 execute_installation \
 'curl -sS https://starship.rs/install.sh' \
 "Installing starship" \
 "starship Installation Completed" \
-"installing starship..."
-
-# Before copying rc files, make backups for each one
-# Make backup folder ~/.config/.shell-configs-backup
-# .bashrc, .zshrc, .vimrc, .vim(if any), ~/.starship.tolm(if any), ~/.config/starship.toml(if any)
-SHELL_CONFIGS="$BASE_DIR/shell-configs"
-# Define an associative array with source and destination pairs
-declare -A files_to_copy=(
-    ["$SHELL_CONFIGS/bashrc"]="$HOME_DIR/.bashrc"
-    ["$SHELL_CONFIGS/zshrc"]="$HOME_DIR/.zshrc"
-    ["$SHELL_CONFIGS/shrc"]="$HOME_DIR/.shrc"
-    ["$SHELL_CONFIGS/vimrc"]="$HOME_DIR/.vimrc"
-    ["$SHELL_CONFIGS/starship.toml"]="$HOME_DIR/.starship.toml"
-)
-# Function to copy a file with a backup
-copy_with_backup() {
-    local source_file=$1
-    local dest_file=$2
-
-    # copy original to backup folder if any (~/.config/shell-configs-backup/)
-    cp -r "$dest_file" "$SHELL_CONFIGS_BACKUP/"
-    # remove orignal
-    rm -rf "$dest_file"
-    # copy config files to appropriate path
-    cp -r "$source_file" "$dest_file"
-}
-# Iterate over the files and copy them
-set +e
-for src in "${!files_to_copy[@]}"; do
-    copy_with_backup "$src" "${files_to_copy[$src]}" >/dev/null 2>&1
-done
-set -e
-
+"installing starship 🚀 "
 ln -s "$HOME_DIR/.starship.toml" "$HOME_DIR/.config/starship.toml" >/dev/null 2>>$LOG_FILE
 
 # Install wslu for wsl utilities
 # This is to use host browser instead of wsl browser.
 {
-add-apt-repository ppa:wslutilities/wslu
+add-apt-repository -y ppa:wslutilities/wslu
 apt update
 apt install wslu
 apt install ubuntu-wsl
-} >/dev/null 2>>$LOG_FILE & spinner wslu
+} >/dev/null 2>>$LOG_FILE & spinner "installing wslu..." $! || true
 
-export BROWSER=wslview >> "$HOME_DIR/.shrc"
-export PATH="/snap/bin:/$HOME_DIR/.local/bin:$PATH" >> "$HOME_DIR/.shrc"
+echo "export BROWSER=wslview
+export PATH=/snap/bin:/$HOME_DIR/.local/bin:$PATH" >> "$HOME_DIR/.shrc"
 
 # Ignore if it errors out or not. It's for fun.
-set +e
-sudo snap install lolcat >/dev/null 2>&1 & spinner finale🎉
-set -e
+sudo snap install lolcat >/dev/null 2>&1 & spinner "" $! || true
 
-echo "+-----------------------------------------+"
-echo "|           Bootstrap Successful          |"
-echo "+-----------------------------------------+"
-echo "restart the terminal"
+{
+echo -en "\n\n\n"
+message_box_clear "Bootstrap Successful" 
+echo -e "\nrestart the terminal\n"
+} | lolcat
