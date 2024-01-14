@@ -138,7 +138,7 @@ execute_installation() {
 #
 DOTFILES_PATH="$BASE_DIR"
 # Define an associative array with source and destination pairs
-files_to_copy=(".bashrc" ".zshrc" ".shrc" ".vimrc" ".starship.toml" ".oh-my-bash" ".oh-my-zsh")
+files_to_override=(".bashrc" ".zshrc" ".shrc" ".vimrc" ".starship.toml" ".oh-my-bash" ".oh-my-zsh")
 backup_configs() {
     local file="$1"
     # Make a copy of original config file,
@@ -152,7 +152,7 @@ copy_configs() {
     cp -rf "$DOTFILES_PATH/$file" "$HOME_DIR/$file"
 }
 # Iterate over the files and make backups
-for file in "${files_to_copy[@]}"; do
+for file in "${files_to_override[@]}"; do
     backup_configs "$file" >/dev/null 2>&1 || true
 done
 
@@ -246,11 +246,17 @@ execute_installation \
 ln -s "$HOME_DIR/.starship.toml" "$HOME_DIR/.config/starship.toml" >/dev/null 2>>$LOG_FILE
 
 #
-# Iterate over the files and make backups
+# Iterate over the files and copy to override defaults
 #
-for file in "${files_to_copy[@]}"; do
+for file in "${files_to_override[@]}"; do
     copy_configs "$file" >/dev/null 2>&1 || true
 done
+
+# Move $HOME/.oh-my-bash and $/HOME/.oh-my-zsh to $HOME/.config/
+{
+mv "$HOME_DIR/.oh-my-bash" "$HOME_DIR/.config/"
+mv "$HOME_DIR/.oh-my-zsh" "$HOME_DIR/.config/"
+}>/dev/null 2>&1 || true
 
 # Install wslu for wsl utilities
 # This is to use host browser instead of wsl browser.
