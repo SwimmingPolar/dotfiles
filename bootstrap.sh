@@ -246,7 +246,7 @@ execute_installation \
 ln -s "$HOME_DIR/.starship.toml" "$HOME_DIR/.config/starship.toml" >/dev/null 2>>$LOG_FILE
 
 #
-# Iterate over the files and make backups
+# Iterate over the files and copy to override defaults
 #
 for file in "${files_to_copy[@]}"; do
     copy_configs "$file" >/dev/null 2>&1 || true
