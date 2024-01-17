@@ -1,0 +1,128 @@
+# Path to your oh-my-zsh installation.
+ZSH=/usr/share/oh-my-zsh
+
+# Path to powerlevel10k theme
+source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+
+# List of plugins used
+plugins=(
+  # additional
+  gh
+  fd 
+  fzf 
+  ripgrep 
+  npm
+  docker
+  docker-compose
+  dotenv
+  # general
+  zsh-256color
+  zsh-autosuggestions
+  zsh-autocomplete
+  zsh-syntax-highlighting
+  cp
+  copypath
+  copyfile
+  git 
+  git-auto-fetch
+  git-commit
+  git-escape-magic
+  git-extras
+  git-flow
+  git-flow-avh
+  git-hubflow
+  git-lfs
+  git-prompt
+  github
+  gitignore
+  gnu-utils
+  gpg-agent
+  history
+  history-substring-search
+  man
+  node
+  nodenv
+  npm
+  nvm
+  pip
+  pipenv
+  pylint
+  python
+  qrcode
+  redis-cli
+  systemd
+  sudo 
+  themes
+  zsh-vi-mode
+  # tmux
+  urltools
+  vi-mode
+  vim-interaction
+  vscode
+  isodate
+  # just in case
+  aws
+  azure
+  command-not-found
+  flutter
+)
+
+lib=(
+  clipboard
+  completion
+  history
+)
+
+# Detect the AUR wrapper
+if pacman -Qi yay &>/dev/null ; then
+   aurhelper="yay"
+elif pacman -Qi paru &>/dev/null ; then
+   aurhelper="paru"
+fi
+
+function in {
+    local pkg="$1"
+    if pacman -Si "$pkg" &>/dev/null ; then
+        sudo pacman -S "$pkg"
+    else
+        "$aurhelper" -S "$pkg"
+    fi
+}
+
+# Helpful aliases
+alias  l='eza -lh  --icons=auto' # long list
+alias ls='eza -1   --icons=auto' # short list
+alias ll='eza -lha --icons=auto --sort=name --group-directories-first' # long list all
+alias ld='eza -lhD --icons=auto' # long list dirs
+alias un='$aurhelper -Rns' # uninstall package
+alias up='$aurhelper -Syu' # update system/package/aur
+alias pl='$aurhelper -Qs' # list installed package
+alias pa='$aurhelper -Ss' # list availabe package
+alias pc='$aurhelper -Sc' # remove unused cache
+alias po='$aurhelper -Qtdq | $aurhelper -Rns -' # remove unused packages, also try > $aurhelper -Qqd | $aurhelper -Rsu --print -
+alias vc='code --disable-gpu' # gui code editor
+alias cat='bat'
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# fzf + fd configuaration
+# enable find-the-command
+source /usr/share/doc/find-the-command/ftc.zsh noprompt
+# override fzf configs
+export FZF_CTRL_T_COMMAND="fd --type file --follow --hidden --exclude .git --ignore-case"
+export FZF_CTRL_T_OPTS="
+  --preview 'bat -n --color=always {}'
+  --bind 'ctrl-/:change-preview-window(down|hidden|)'
+  --bind 'ctrl-h:preview-page-up'
+  --bind 'ctrl-l:preview-page-down'"
+export FZF_ALT_C_COMMAND="fd --type directory --hidden --exclude .git"
+export FZF_ALT_C_OPTS="--preview 'tree -C {}'"
+
+# zsh-autocomplete reassign
+bindkey '\t' menu-complete "$terminfo[kcbt]" reverse-menu-complete
+
+export PAGER=bat
+
+# refresh zshrc
+source "$ZSH/oh-my-zsh.sh"
