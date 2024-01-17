@@ -1,5 +1,5 @@
 #!/usr/bin/zsh
 
 # man page default pager
-export PAGER=less
+export PAGER=bat
 

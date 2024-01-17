@@ -126,3 +126,4 @@ export PAGER=bat
 
 # refresh zshrc
 source "$ZSH/oh-my-zsh.sh"
+
