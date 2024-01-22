@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Check for --confirm flag
 CONFIRM_CHANGES=false
@@ -75,12 +75,13 @@ read_chezmoiignore() {
 is_ignored() {
 	local file="$1"
 	for pattern in "${IGNORE_PATTERNS[@]}"; do
-		# Debugging output
 		if [[ "$file" == "$pattern" ]]; then
-			return 0 # File is ignored
+			# File is ignored
+			return 0
 		fi
 	done
-	return 1 # File is not ignored
+	# File is not ignored
+	return 1
 }
 
 # Function to execute tasks based on the confirm flag
@@ -144,15 +145,26 @@ process_path() {
 process_file() {
 	local chezmoi_file="$1"
 	local original_file="$2"
+	local processed_path="$3"
 
 	if [ ! -e "$original_file" ]; then
 		DELETED+=("$original_file")
+	elif [[ $chezmoi_file == *symlink_* ]]; then
+		# Symlinks are compared by the path it is pointing at
+		# *It is not* compared by the content of the original files
+		local chezmoi_symlink_path="$(cat $chezmoi_file)"
+		local original_symlink_file="$original_file"
+		local original_symlink_path="$(readlink $original_symlink_file)"
+
+		echo "symlinks"
+		echo "$chezmoi_symlink_path"
+		echo "$original_symlink_path"
 	elif ! diff -q "$chezmoi_file" "$original_file" >/dev/null; then
 		CHANGED["$original_file"]="$chezmoi_file"
 	fi
 }
 
-# Determine if directory or file
+# Script entry
 process_chezmoi_repo() {
 	local repo_path="$1"
 	for item in "$repo_path"/*; do
@@ -169,7 +181,7 @@ process_chezmoi_repo() {
 			if is_ignored "$processed_path"; then
 				continue
 			fi
-			process_file "$item" "$original_file"
+			process_file "$item" "$original_file" "$processed_path"
 		fi
 	done
 }
