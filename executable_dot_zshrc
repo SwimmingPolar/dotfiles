@@ -102,6 +102,8 @@ alias pc='$aurhelper -Sc' # remove unused cache
 alias po='$aurhelper -Qtdq | $aurhelper -Rns -' # remove unused packages, also try > $aurhelper -Qqd | $aurhelper -Rsu --print -
 alias vc='code --disable-gpu' # gui code editor
 alias cat='bat'
+alias nvim="$HOME/.config/nvim/lazy_vim_with_neovide.sh"
+alias temp="cd $(mktemp -d)"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
@@ -126,4 +128,64 @@ export PAGER=bat
 
 # refresh zshrc
 source "$ZSH/oh-my-zsh.sh"
+
+# Switch between Ripgrep launcher mode (CTRL-R) and fzf filtering mode (CTRL-F)
+function enhancedFzfSearch() {
+  rm -f /tmp/rg-fzf-{r,f}
+  RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
+  INITIAL_QUERY="${*:-}"
+  : | fzf --ansi --disabled --query "$INITIAL_QUERY" \
+      --bind "start:reload($RG_PREFIX {q})+unbind(ctrl-r)" \
+      --bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
+      --bind "ctrl-f:unbind(change,ctrl-f)+change-prompt(2. fzf> )+enable-search+rebind(ctrl-r)+transform-query(echo {q} > /tmp/rg-fzf-r; cat /tmp/rg-fzf-f)" \
+      --bind "ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($RG_PREFIX {q} || true)+rebind(change,ctrl-f)+transform-query(echo {q} > /tmp/rg-fzf-f; cat /tmp/rg-fzf-r)" \
+      --bind 'enter:become(vim {1} +{2})' \
+      --bind='ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+      --prompt '1. ripgrep> ' \
+      --delimiter : \
+      --header '╱ CTRL-R (ripgrep mode) ╱ CTRL-F (fzf mode) ╱' \
+      --height '90%' \
+      --reverse \
+      --border \
+      --preview 'bat --color=always {1} --wrap auto --highlight-line {2} --style numbers'
+
+      # --color "hl:-1:underline,hl+:-1:underline:reverse" \
+      # --preview-window '+{2}-10'
+}
+
+# list all zsh widgets
+# zle -al
+
+zle     -N            enhancedFzfSearch
+bindkey -M emacs '' enhancedFzfSearch
+bindkey -M vicmd '' enhancedFzfSearch
+bindkey -M viins '' enhancedFzfSearch
+
+# Remove tab keybindding
+bindkey -r '^[[Z'
+
+# Auto-suggestion
+# Tab to complete suggestion
+bindkey '^I' autosuggest-accept
+# Ctrl + RightArrow to partially complete suggestion
+bindkey '^[[1;5C' forward-word
+
+# Auto-complete
+# Ctrl + UpArrow
+bindkey '^[[1;5A' reverse-menu-complete
+# Ctrl + DownArrow
+bindkey '^[[1;5B' menu-select
+
+# Standard bash completion on autocomplete failure
+zstyle ':completion:*' completer _complete _ignored _files
+autoload -U compinit && compinit
+
+# Read ohz configs
+source "$ZSH/oh-my-zsh.sh"
+
+# zsh-autocomplete fix with zsh@5.9
+# replace this line /plguin/path/zsh-autocomplete/.../autocomplete...async
+# local -i timeout=$(( 100 * max( 0, min_delay - SECONDS ) ))
+# zselect -t $timeout
+
 

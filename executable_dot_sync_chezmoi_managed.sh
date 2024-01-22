@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Check for --confirm flag
+CONFIRM_CHANGES=false
+if [ "$1" == "--confirm" ]; then
+	CONFIRM_CHANGES=true
+fi
+
+# Global arrays for changed and deleted files
+# Associative array for CHANGED (chezmoi file path, original file path)
+declare -A CHANGED
+CHANGED=()
+DELETED=()
+
 # Chezmoi local repository
 CHEZMOI_LOCAL_REPO="$HOME/.local/share/chezmoi"
 
@@ -40,24 +52,6 @@ translate_name() {
 	echo "$name"
 }
 
-# Function to display a colored diff of a changed file and ask to add it to Chezmoi
-show_diff_and_ask_to_add() {
-	local chezmoi_file="$1"
-	local original_file="$2"
-
-	# Display diff
-	if command -v colordiff &>/dev/null; then
-		colordiff -u "$chezmoi_file" "$original_file" | less -R
-	else
-		diff -u "$chezmoi_file" "$original_file" | less -R
-	fi
-
-	# Ask user whether to add the original file to Chezmoi
-	read -p "Do you want to add this file to Chezmoi? [y/N]: " -r
-	if [[ $REPLY =~ ^[Yy]$ ]]; then
-		chezmoi add "$original_file"
-	fi
-}
 # Function to read .chezmoiignore and create an array of ignored patterns
 read_chezmoiignore() {
 	local ignore_file="$CHEZMOI_LOCAL_REPO/.chezmoiignore"
@@ -88,47 +82,94 @@ is_ignored() {
 	done
 	return 1 # File is not ignored
 }
+
+# Function to execute tasks based on the confirm flag
+execute_task() {
+	if $CONFIRM_CHANGES; then
+		# For files deleted, ask to remove from Chezmoi
+		for original_file in "${DELETED[@]}"; do
+			echo -e "\e[1;31mDeleted: \e[0m$original_file"
+			read -p "Do you want to remove this target from Chezmoi? [y/N]: " -r
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				chezmoi remove "$original_file"
+			fi
+		done
+		echo ""
+
+		# For files changed, show diff and ask to add to Chezmoi
+		for original_file in "${!CHANGED[@]}"; do
+			local chezmoi_file="${CHANGED[$original_file]}"
+
+			# Display diff
+			if command -v colordiff &>/dev/null; then
+				colordiff -u "$chezmoi_file" "$original_file" | less -R
+			else
+				diff -u "$chezmoi_file" "$original_file" | less -R
+			fi
+
+			# Ask user whether to add the original file to Chezmoi
+			echo -e "\e[1;36mModified: \e[0m$original_file"
+			read -p "Do you want to run 'chezmoi add' to this file? [y/N]: " -r
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				chezmoi add "$original_file"
+			fi
+		done
+	else
+		# Output modified information
+		# without running tasks
+		for original_file in "${DELETED[@]}"; do
+			echo -e "\e[1;31mDeleted: \e[0m$original_file"
+		done
+		echo ""
+		for original_file in "${!CHANGED[@]}"; do
+			echo -e "\e[1;36mModified: \e[0m$original_file"
+		done
+	fi
+}
+
 # Function to process a path component by component
 process_path() {
 	local path="$1"
 	local processed_path=""
 	IFS='/' read -ra ADDR <<<"$path"
 	for component in "${ADDR[@]}"; do
-		if [ ! -z "$component" ]; then
-			if [ -z "$processed_path" ]; then
-				# First component, add without leading '/'
-				processed_path="$(translate_name "$component")"
-			else
-				# Subsequent components, add with leading '/'
-				processed_path+="/$(translate_name "$component")"
-			fi
-		fi
+		processed_path+="/$(translate_name "$component")"
 	done
-	echo "$processed_path"
+	# Remove leading slash
+	echo "${processed_path#/}"
 }
 
-# Function to recursively process files and directories in the Chezmoi local repo
+# Determine if file/directory has changed/deleted
+# Run corresponding tasks for each case
+process_file() {
+	local chezmoi_file="$1"
+	local original_file="$2"
+
+	if [ ! -e "$original_file" ]; then
+		DELETED+=("$original_file")
+	elif ! diff -q "$chezmoi_file" "$original_file" >/dev/null; then
+		CHANGED["$original_file"]="$chezmoi_file"
+	fi
+}
+
+# Determine if directory or file
 process_chezmoi_repo() {
 	local repo_path="$1"
 	for item in "$repo_path"/*; do
+		# It's a directory, recurse into it
 		if [ -d "$item" ]; then
-			# It's a directory, recurse into it
 			process_chezmoi_repo "$item"
+		# It's a file, process the path
 		elif [ -f "$item" ]; then
-			# It's a file, process the path
-			local relative_path="${item#$CHEZMOI_LOCAL_REPO}"
+			local relative_path="${item#$CHEZMOI_LOCAL_REPO/}"
+			# Remove leading '/' from relative path
 			local processed_path=$(process_path "$relative_path")
+			# Add '/' here when concatenating with $HOME
 			local original_file="$HOME/$processed_path"
-			# Check if the file is ignored
 			if is_ignored "$processed_path"; then
 				continue
 			fi
-			# Compare the file with its original counterpart
-			if ! diff -q "$item" "$original_file" >/dev/null; then
-				# Files are different, echo the file name
-				show_diff_and_ask_to_add "$item" "$original_file"
-				echo "Changed file: $original_file"
-			fi
+			process_file "$item" "$original_file"
 		fi
 	done
 }
@@ -138,3 +179,6 @@ IGNORE_PATTERNS=($(read_chezmoiignore))
 
 # Start processing the Chezmoi local repository
 process_chezmoi_repo "$CHEZMOI_LOCAL_REPO"
+
+# Actually run tasks
+execute_task
