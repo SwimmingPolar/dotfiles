@@ -97,18 +97,24 @@ alias ld='eza -lhD --icons=auto' # long list dirs
 alias un='$aurhelper -Rns' # uninstall package
 alias up='$aurhelper -Syu' # update system/package/aur
 alias pl='$aurhelper -Qs' # list installed package
-alias pa='$aurhelper -Ss' # list availabe package
+alias pa='$aurhelper -Ss' # list available vilable package
 alias pc='$aurhelper -Sc' # remove unused cache
 alias po='$aurhelper -Qtdq | $aurhelper -Rns -' # remove unused packages, also try > $aurhelper -Qqd | $aurhelper -Rsu --print -
 alias vc='code --disable-gpu' # gui code editor
 alias cat='bat'
 alias nvim="$HOME/.config/nvim/lazy_vim_with_neovide.sh"
 alias temp="cd $(mktemp -d)"
+alias _cnvim="cd $HOME/.config/nvim"
+alias _envim="nvim $HOME/.config/nvim"
+alias _chypr="cd $HOME/.config/hypr"
+alias _ehypr="nvim $HOME/.config/hypr"
+alias _ezsh="nvim $HOME/.zshrc"
+alias _sz="source $HOME/.zshrc"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# fzf + fd configuaration
+# fzf + fd configuration
 # enable find-the-command
 source /usr/share/doc/find-the-command/ftc.zsh noprompt
 # override fzf configs
@@ -131,57 +137,65 @@ source "$ZSH/oh-my-zsh.sh"
 
 # Switch between Ripgrep launcher mode (CTRL-R) and fzf filtering mode (CTRL-F)
 function enhancedFzfSearch() {
-  rm -f /tmp/rg-fzf-{r,f}
-  RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
-  INITIAL_QUERY="${*:-}"
-  : | fzf --ansi --disabled --query "$INITIAL_QUERY" \
-      --bind "start:reload($RG_PREFIX {q})+unbind(ctrl-r)" \
-      --bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
-      --bind "ctrl-f:unbind(change,ctrl-f)+change-prompt(2. fzf> )+enable-search+rebind(ctrl-r)+transform-query(echo {q} > /tmp/rg-fzf-r; cat /tmp/rg-fzf-f)" \
-      --bind "ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($RG_PREFIX {q} || true)+rebind(change,ctrl-f)+transform-query(echo {q} > /tmp/rg-fzf-f; cat /tmp/rg-fzf-r)" \
-      --bind 'enter:become(vim {1} +{2})' \
-      --bind='ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
-      --prompt '1. ripgrep> ' \
-      --delimiter : \
-      --header '╱ CTRL-R (ripgrep mode) ╱ CTRL-F (fzf mode) ╱' \
-      --height '90%' \
-      --reverse \
-      --border \
-      --preview 'bat --color=always {1} --wrap auto --highlight-line {2} --style numbers'
+#   rm -f /tmp/rg-fzf-{r,f}
+#   RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
+#   INITIAL_QUERY="${*:-}"
+#   : | fzf --ansi --disabled --query "$INITIAL_QUERY" \
+#       --bind "start:reload($RG_PREFIX {q})+unbind(ctrl-r)" \
+#       --bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
+#       --bind "ctrl-f:unbind(change,ctrl-f)+change-prompt(2. fzf> )+enable-search+rebind(ctrl-r)+transform-query(echo {q} > /tmp/rg-fzf-r; cat /tmp/rg-fzf-f)" \
+#       --bind "ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($RG_PREFIX {q} || true)+rebind(change,ctrl-f)+transform-query(echo {q} > /tmp/rg-fzf-f; cat /tmp/rg-fzf-r)" \
+#       --bind 'enter:become(vim {1} +{2})' \
+#       --bind='ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+#       --prompt '1. ripgrep> ' \
+#       --delimiter : \
+#       --header '╱ CTRL-R (ripgrep mode) ╱ CTRL-F (fzf mode) ╱' \
+#       --height '90%' \
+#       --reverse \
+#       --border \
+#       --preview 'bat --color=always {1} --highlight-line {2}' 
+# }
 
-      # --color "hl:-1:underline,hl+:-1:underline:reverse" \
-      # --preview-window '+{2}-10'
-}
+rm -f /tmp/rg-fzf-{r,f}
+RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
+INITIAL_QUERY="${*:-}"
+: | fzf --ansi --disabled --query "$INITIAL_QUERY" \
+    --bind "start:reload($RG_PREFIX {q})+unbind(ctrl-r)" \
+    --bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
+    --bind "ctrl-f:unbind(change,ctrl-f)+change-prompt(2. fzf> )+enable-search+rebind(ctrl-r)+transform-query(echo {q} > /tmp/rg-fzf-r; cat /tmp/rg-fzf-f)" \
+    --bind "ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($RG_PREFIX {q} || true)+rebind(change,ctrl-f)+transform-query(echo {q} > /tmp/rg-fzf-f; cat /tmp/rg-fzf-r)" \
+    --color "hl:-1:underline,hl+:-1:underline:reverse" \
+    --prompt '1. ripgrep> ' \
+    --delimiter : \
+    --header '╱ CTRL-R (ripgrep mode) ╱ CTRL-F (fzf mode) ╱' \
+    --preview 'bat --color=always {1} --highlight-line {2}' \
+    --preview-window 'up,60%,border-bottom,+{2}+3/3,~3' \
+    --bind 'enter:become(vim {1} +{2})'
+  }   
 
 # list all zsh widgets
 # zle -al
+bindkey -r '^F'
+zle     -N enhancedFzfSearch
+bindkey -M emacs '^F' enhancedFzfSearch
+bindkey -M vicmd '^F' enhancedFzfSearch
+bindkey -M viins '^F' enhancedFzfSearch
 
-zle     -N            enhancedFzfSearch
-bindkey -M emacs '' enhancedFzfSearch
-bindkey -M vicmd '' enhancedFzfSearch
-bindkey -M viins '' enhancedFzfSearch
-
-# Remove tab keybindding
-bindkey -r '^[[Z'
-
+autoload -U compinit && compinit
 # Auto-suggestion
-# Tab to complete suggestion
-bindkey '^I' autosuggest-accept
 # Ctrl + RightArrow to partially complete suggestion
 bindkey '^[[1;5C' forward-word
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 # Auto-complete
 # Ctrl + UpArrow
 bindkey '^[[1;5A' reverse-menu-complete
 # Ctrl + DownArrow
 bindkey '^[[1;5B' menu-select
-
+# Make Tab and ShiftTab cycle completions on the command line
+bindkey -M menuselect '\t' menu-complete "$terminfo[kcbt]" reverse-menu-complete
 # Standard bash completion on autocomplete failure
 zstyle ':completion:*' completer _complete _ignored _files
-autoload -U compinit && compinit
-
-# Read ohz configs
-source "$ZSH/oh-my-zsh.sh"
 
 # zsh-autocomplete fix with zsh@5.9
 # replace this line /plguin/path/zsh-autocomplete/.../autocomplete...async
@@ -189,3 +203,5 @@ source "$ZSH/oh-my-zsh.sh"
 # zselect -t $timeout
 
 
+# refresh zshrc
+source "$ZSH/oh-my-zsh.sh"
