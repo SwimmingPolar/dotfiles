@@ -2,6 +2,14 @@
 -- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
 -- Add any additional options here
 
+-- Vim configs
+vim.opt.ignorecase = false
+vim.opt.virtualedit = "none"
+vim.opt.swapfile = false
+vim.opt.backup = false
+vim.opt.autochdir = true
+
+-- Neovide configs
 -- Checks if Neovide is running and allows setting Neovide-specific configurations.
 if vim.g.neovide then
   -- Sets the font used by Neovide.
@@ -54,7 +62,7 @@ if vim.g.neovide then
   -- vim.g.neovide_underline_stroke_scale = 1.0
 
   -- Sets the theme for Neovide.
-  vim.g.neovide_theme = 'auto'
+  vim.g.neovide_theme = "auto"
 
   -- Fixes border and winbar scrolling glitches.
   vim.g.neovide_unlink_border_highlights = true
