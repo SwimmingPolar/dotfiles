@@ -1,73 +1,76 @@
-if not table.unpack then
-    table.unpack = unpack
-end
+if not table.unpack then table.unpack = unpack end
 
 vim.loader.enable()
 
-require 'utils'
+require("utils")
 
-vim.cmd 'colorscheme gruvluke'
+vim.cmd("colorscheme gruvluke")
 
-local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
-    vim.fn.system {'git', 'clone', '--filter=blob:none', 'https://github.com/folke/lazy.nvim.git', '--branch=stable',
-                   lazypath}
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",
+    lazypath,
+  })
 end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-    spec = { -- add LazyVim and import its plugins
+  spec = { -- add LazyVim and import its plugins
     {
-        "LazyVim/LazyVim",
-        import = "lazyvim.plugins"
+      "LazyVim/LazyVim",
+      import = "lazyvim.plugins",
     }, -- import any extras modules here
-    -- { import = "lazyvim.plugins.extras.lang.typescript" },
+    {
+      {
+        import = "lazyvim.plugins.extras.linting.eslint",
+      },
+      {
+        import = "lazyvim.plugins.extras.formatting.prettier",
+      },
+    }, -- { import = "lazyvim.plugins.extras.lang.typescript" },
     -- { import = "lazyvim.plugins.extras.lang.json" },
     -- { import = "lazyvim.plugins.extras.ui.mini-animate" },
     -- import/override with your plugins
     {
-        import = "plugins"
-    }},
-    defaults = {
-        -- By default, only LazyVim plugins will be lazy-loaded. Your custom plugins will load during startup.
-        -- If you know what you're doing, you can set this to `true` to have all your custom plugins lazy-loaded by default.
-        lazy = false,
-        -- It's recommended to leave version=false for now, since a lot the plugin that support versioning,
-        -- have outdated releases, which may break your Neovim install.
-        version = false -- always use the latest git commit
-        -- version = "*", -- try installing the latest stable version for plugins that support semver
+      import = "plugins",
     },
-    install = {
-        colorscheme = {"gruvluke"}
+  },
+  defaults = {
+    -- By default, only LazyVim plugins will be lazy-loaded. Your custom plugins will load during startup.
+    -- If you know what you're doing, you can set this to `true` to have all your custom plugins lazy-loaded by default.
+    lazy = false,
+    -- It's recommended to leave version=false for now, since a lot the plugin that support versioning,
+    -- have outdated releases, which may break your Neovim install.
+    version = false, -- always use the latest git commit
+    -- version = "*", -- try installing the latest stable version for plugins that support semver
+  },
+  install = {
+    colorscheme = { "gruvluke" },
+  },
+  checker = {
+    enabled = true,
+  }, -- automatically check for plugin updates
+  ui = {
+    border = "rounded",
+    backdrop = 100,
+  },
+  performance = {
+    rtp = {
+      -- disable some rtp plugins
+      disabled_plugins = {
+        "gzip", -- "matchit",
+        -- "matchparen",
+        -- "netrwPlugin",
+        "tarPlugin",
+        "tohtml",
+        "tutor",
+        "zipPlugin",
+      },
     },
-    checker = {
-        enabled = true
-    }, -- automatically check for plugin updates
-    ui = {
-        border = 'rounded',
-        backdrop = 100
-    },
-    performance = {
-        rtp = {
-            -- disable some rtp plugins
-            disabled_plugins = {"gzip", -- "matchit",
-            -- "matchparen",
-            -- "netrwPlugin",
-            "tarPlugin", "tohtml", "tutor", "zipPlugin"}
-        }
-    }
+  },
 })
-
--- source all .vimrc files
-local function source_vimrc_files()
-    local vimrc_dir = vim.fn.expand("./vimrc/")
-    local vimrc_files = vim.fn.globpath(vimrc_dir, "*.vimrc", false, true)
-
-    for _, file in ipairs(vimrc_files) do
-        vim.cmd('source ' .. file)
-    end
-end
-
--- Call the function to source the .vimrc files
-source_vimrc_files()
-

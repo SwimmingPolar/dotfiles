@@ -42,7 +42,7 @@ return {
         },
         window = {
             position = 'left',
-            width = 40,
+            width = 32,
             mappings = {
                 ['<cr>'] = 'open_drop',
                 ['<space>'] = {
