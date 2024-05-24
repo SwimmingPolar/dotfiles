@@ -18,20 +18,6 @@ zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 # Uncomment the following line to change how often to auto-update (in days).
 zstyle ':omz:update' frequency 7
 
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# You can also set it to another string to have that shown instead of the default red dots.
-# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
-# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
 # Uncomment the following line if you want to change the command execution time
 # stamp shown in the history command output.
 # You can set one of the optional three formats:
@@ -61,10 +47,6 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-###### User configuration ######
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
@@ -75,23 +57,25 @@ else
   export EDITOR='mvim'
 fi
 
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
 if [ -f /etc/zsh_command_not_found ]; then
     source /etc/zsh_command_not_found
 fi
 
+#############################################
+############ Custom Configuration ###########
+#############################################
+
+###
+### Environment variables
+###
 export PATH=/snap/bin:${PATH}
 export EDITOR=nvim
+export PAGER="batcat --color always --paging always --style grid --style number --style full"
 
-alias bat="bat --color always --paging always --style grid --style number --style full"
+###
+### Aliases
+###
+alias bat="batcat --color always --paging always --style grid --style number --style full"
 alias vim=nvim
 alias l="eza -l"
 alias ll="eza -lh"
@@ -99,19 +83,34 @@ alias py=python3
 alias pip=pip3
 alias fd=fdfind
 
-eval AI_AC_ZSH_SETUP_PATH=/home/swimmingpolar/.cache/ai/autocomplete/zsh_setup && test -f $AI_AC_ZSH_SETUP_PATH && source $AI_AC_ZSH_SETUP_PATH; # ai autocomplete setup
+###
+### Key bindings
+###
+# CTRL+F5 to reload zshrc
+source_zshrc() {
+  source ~/.zshrc
+  echo "zshrc reloaded \n"
+}
+zle -N source_zshrc
+bindkey '^[[15;5~' "source_zshrc"
+# CTRL+ALT+F5 to open zshrc file
+open_zshrc() {
+  vim ~/.zshrc
+}
+zle -N open_zshrc
+bindkey '^[[15;7~' "open_zshrc"
 
+###
+### fzf configuration
+###
 source <(fzf --zsh)
-
 export FZF_DEFAULT_OPTS='--color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4'
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git --exclude node_modules"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-# Preview file content using bat (https://github.com/sharkdp/bat)
 export FZF_CTRL_T_OPTS="
   --walker-skip .git,node_modules,target
-  --preview 'bat --style=numbers --color=always {}'
+  --preview 'batcat --style=numbers --color=always {}'
   --bind 'ctrl-/:change-preview-window(down|hidden|)'"
-
 # CTRL-/ to toggle small preview window to see the full command
 # CTRL-Y to copy the command into clipboard using pbcopy
 export FZF_CTRL_R_OPTS="
@@ -120,16 +119,26 @@ export FZF_CTRL_R_OPTS="
   --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
   --color header:italic
   --header 'Press CTRL-Y to copy command into clipboard'"
-
 # Print tree structure in the preview window
 export FZF_ALT_C_OPTS="
   --walker-skip .git,node_modules,target
   --preview 'tree -C {}'"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-
+###
 ### zsh auto-suggestion configuration
+###
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=30
+
+###
 ### zsh auto-complete configuration
+###
 zstyle ':autocomplete:*' min-input 3
 
+###
+### Github Copilot
+###
+eval "$(gh copilot alias -- zsh)"
+alias ai="ghcs"
+alias aiwhatis="ghce"
