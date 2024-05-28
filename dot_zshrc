@@ -89,7 +89,6 @@ alias fd=fdfind
 # CTRL+F5 to reload zshrc
 source_zshrc() {
   source ~/.zshrc
-  echo "zshrc reloaded \n"
 }
 zle -N source_zshrc
 bindkey '^[[15;5~' "source_zshrc"
@@ -129,7 +128,7 @@ export FZF_ALT_C_OPTS="
 ### zsh auto-suggestion configuration
 ###
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=30
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=128
 
 ###
 ### zsh auto-complete configuration
@@ -140,5 +139,5 @@ zstyle ':autocomplete:*' min-input 3
 ### Github Copilot
 ###
 eval "$(gh copilot alias -- zsh)"
-alias ai="ghcs"
-alias aiwhatis="ghce"
+alias ai="gh copilot suggest"
+alias aiwhatis="gh copilot explain"
