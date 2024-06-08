@@ -42,7 +42,8 @@ plugins=(
 	history
 	zsh-syntax-highlighting
 	zsh-autosuggestions
-  zsh-autocomplete
+    zsh-autocomplete
+    tmux
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -61,27 +62,60 @@ if [ -f /etc/zsh_command_not_found ]; then
     source /etc/zsh_command_not_found
 fi
 
-#############################################
 ############ Custom Configuration ###########
+#############################################
 #############################################
 
 ###
 ### Environment variables
 ###
 export PATH=/snap/bin:${PATH}
-export EDITOR=nvim
-export PAGER="batcat --color always --paging always --style grid --style number --style full"
+export EDITOR=vim
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
 ###
 ### Aliases
 ###
-alias bat="batcat --color always --paging always --style grid --style number --style full"
 alias vim=nvim
-alias l="eza -l"
+alias l="eza"
 alias ll="eza -lh"
+alias lll="eza -lha"
 alias py=python3
 alias pip=pip3
 alias fd=fdfind
+alias find=fdfind
+alias bat="bat --paging=always --color=always"
+alias less="bat --paging=always --color=always"
+alias cat=bat
+get_project_root() {
+  git rev-parse --show-toplevel 2>/dev/null
+}
+cd_to_project_root() {
+  local project_root="$(get_project_root)"
+  if [[ -n $project_root ]]; then
+    local previous_dir="$(pwd)"
+
+    cd "$project_root"
+
+    local current_dir="$(pwd)"
+    echo -e "previous: \e[90m$previous_dir\e[0m\n current: \e[32m$current_dir\e[0m"
+  else
+    echo "no project root: $(pwd)"
+  fi
+}
+print_project_root() {
+  local project_root="$(get_project_root)"
+  if [[ -n $project_root ]]; then
+    echo -e "project_root: \e[32m$project_root\e[0m"
+  else
+    echo "no project root: $(pwd)"
+  fi
+}
+# cd to project root function
+alias cdr='cd_to_project_root'
+# print project root function
+alias ppr='print_project_root'
+
 
 ###
 ### Key bindings
@@ -99,28 +133,36 @@ open_zshrc() {
 zle -N open_zshrc
 bindkey '^[[15;7~' "open_zshrc"
 
-###
-### fzf configuration
-###
-source <(fzf --zsh)
-export FZF_DEFAULT_OPTS='--color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4'
-export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git --exclude node_modules"
+# Set up fzf key bindings and fuzzy completion
+export RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case"
+# Default Commands
+export FZF_DEFAULT_COMMAND='fd --type file --strip-cwd-prefix --hidden --follow --glob --exclude "**/.git/*" --exclude "**/node_modules/*"'
+export FZF_DEFAULT_OPTS="\
+    --ansi \
+    --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 \
+    --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4"
+# CTRL - T to toggle find files window
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_CTRL_T_OPTS="
-  --walker-skip .git,node_modules,target
-  --preview 'batcat --style=numbers --color=always {}'
-  --bind 'ctrl-/:change-preview-window(down|hidden|)'"
+export FZF_CTRL_T_OPTS="\
+    --bind 'change:reload:sleep 0.1; $RG_PREFIX {q} || true' \
+    --bind 'ctrl-f:unbind(change,ctrl-f)+change-prompt(1. fzf> )+enable-search+rebind(ctrl-r)+transform-query(echo {q} > /tmp/rg-fzf-r; cat /tmp/rg-fzf-f)' \
+    --bind 'ctrl-r:unbind(ctrl-r)+change-prompt(2. ripgrep> )+disable-search+reload($RG_PREFIX {q} || true)+rebind(change,ctrl-f)+transform-query(echo {q} > /tmp/rg-fzf-f; cat /tmp/rg-fzf-r)' \
+    --color 'hl:-1:underline,hl+:-1:underline:reverse' \
+    --prompt '1. fzf> ' \
+    --delimiter : \
+    --header '╱ CTRL-F (Fzf mode) ╱ CTRL-R (Ripgrep mode) ╱' \
+    --preview 'bat --color=always {1} --highlight-line {2}' \
+    --bind 'enter:become(vim {1} +{2})'"
 # CTRL-/ to toggle small preview window to see the full command
 # CTRL-Y to copy the command into clipboard using pbcopy
-export FZF_CTRL_R_OPTS="
-  --preview 'echo {}' --preview-window up:3:hidden:wrap
-  --bind 'ctrl-/:toggle-preview'
-  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
-  --color header:italic
+export FZF_CTRL_R_OPTS="\
+  --preview 'echo {}' --preview-window up:3:hidden:wrap \
+  --bind 'ctrl-/:toggle-preview' \
+  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort' \
+  --color header:italic \
   --header 'Press CTRL-Y to copy command into clipboard'"
 # Print tree structure in the preview window
-export FZF_ALT_C_OPTS="
-  --walker-skip .git,node_modules,target
+export FZF_ALT_C_OPTS="\
   --preview 'tree -C {}'"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
