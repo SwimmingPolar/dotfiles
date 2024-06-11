@@ -85,8 +85,6 @@ alias pip=pip3
 alias fd=fdfind
 alias find=fdfind
 alias bat="bat --paging=always --color=always"
-alias less="bat --paging=always --color=always"
-alias cat=bat
 get_project_root() {
   git rev-parse --show-toplevel 2>/dev/null
 }
