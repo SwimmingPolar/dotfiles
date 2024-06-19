@@ -1,0 +1,10 @@
+#! /bin/bash
+
+function run_script() {
+	# get path of script
+	local script=$1
+
+	bash -c "$HOME/.desktop/scripts/$script"
+}
+
+alias s=run_script
