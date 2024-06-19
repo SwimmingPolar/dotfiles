@@ -162,4 +162,4 @@ alias ai="gh copilot suggest"
 alias aiwhatis="gh copilot explain"
 
 # Run keychain to load ssh keys
-eval $(keychain --eval --agents ssh id_rsa)
+eval $(keychain --eval --agents ssh id_rsa > /dev/null 2>&1)
