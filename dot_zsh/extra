@@ -1,1 +1,17 @@
-source "$HOME/.zsh/aliases/aliases"
+#!/bin/bash
+
+# current script name
+script=$(basename "$0")
+
+cd "$HOME/.zsh"
+
+while IFS= read -r -d '' file; do
+	file_name=$(basename "$file")
+	if [[ "$file_name" == "$script" ]] || [[ "$file_name" == "" ]] || [[ "$file_name" =~ .keep ]]; then
+		continue
+	fi
+	# Source each file
+	source "$HOME/.zsh/${file:2}"
+done < <(find . -type f -print0)
+
+cd ~
