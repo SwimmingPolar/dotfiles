@@ -1,0 +1,35 @@
+#! /bin/bash
+
+# .chezmoiignore is respected by chezmoi managed already
+
+# list of DIRECTORIES that are managed by chezmoi_managed
+# but should not be expanded to tree
+do_not_expand=(
+	nvim
+	.oh-my-zsh
+)
+
+# Convert do_not_expand to regex
+filter=$(
+	printf "|.*/?%s/?.*" "${do_not_expand[@]}" |
+		cut -c 2-
+)
+
+# List of files managed by chezmoi
+# without the directories that should not be expanded
+chezmoi_managed="$(
+	chezmoi managed |
+		grep -Ev "$filter" |
+		tree --fromfile --noreport
+)"
+# Remove the leading dot from the files
+chezmoi_managed=${chezmoi_managed/\./}
+
+# Join the do_not_expand array to string
+IFS=$'\n'
+excluded_dirs=$(printf "├── %s (Directory Managed)\n" "${do_not_expand[@]}")
+
+echo "Chezmoi Managed Files: "
+echo -e "\e[36m$excluded_dirs\e[0m"
+echo -n "│"
+echo "$chezmoi_managed"
