@@ -1,9 +1,0 @@
-#! /bin/bash
-
-list=(
-  run_script
-)
-
-for i in ${list[@]}; do
-  source "$HOME/.zsh/aliases/$i"
-done
