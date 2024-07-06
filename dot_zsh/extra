@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# current script name
+script=$(basename "$0")
+
+cd "$HOME/.zsh" || exit
+
+while IFS= read -r -d '' file; do
+  # Ignore scripts directory (They are for explicit scripts call)
+  dir_name=$(dirname "$file")
+  if [[ "${dir_name: -8}" == "/scripts" ]]; then
+    continue
+  fi
+
+  file_name=$(basename "$file")
+  if [[ "$file_name" == "$script" ]] || [[ "$file_name" == "" ]] || [[ "$file_name" =~ .keep ]]; then
+    continue
+  fi
+  # Source each file
+  source "$HOME/.zsh/${file:2}"
+done < <(find . -type f -print0)
+
+cd ~ || exit
