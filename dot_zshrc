@@ -87,3 +87,10 @@ execute_last_command() {
 }
 zle -N execute_last_command
 bindkey '@@' execute_last_command
+
+# Github Copilot
+echo 'eval "$(gh copilot alias -- zsh)"' >> ~/.zshrc
+eval "$(gh copilot alias -- zsh)"
+alias how="gh copilot suggest"
+alias what="gh copilot explain"
+eval "$(gh copilot alias -- zsh)"
