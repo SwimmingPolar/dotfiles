@@ -7,7 +7,7 @@ return {
       "MunifTanjim/nui.nvim",
     },
     window = {
-      width = 38,
+      width = 32,
     },
     source_selector = {
       winbar = true, -- toggle to show selector on winbar
