@@ -1,0 +1,24 @@
+name: Gruvbox Dark Soft Theme
+accent: "#83a598" # Blue (base0D) as accent color
+background: "#32302f" # Darkest color (base00) as background
+foreground: "#d5c4a1" # Light color (base05) as foreground
+details: darker # This is a dark theme
+terminal_colors:
+  bright:
+    black: "#3c3836" # base01
+    blue: "#83a598" # base0D
+    cyan: "#8ec07c" # base0C
+    green: "#b8bb26" # base0B
+    magenta: "#d3869b" # base0E
+    red: "#fb4934" # base08
+    white: "#fbf1c7" # base07
+    yellow: "#fabd2f" # base0A
+  normal:
+    black: "#32302f" # base00
+    blue: "#83a598" # base0D
+    cyan: "#8ec07c" # base0C
+    green: "#b8bb26" # base0B
+    magenta: "#d3869b" # base0E
+    red: "#fb4934" # base08
+    white: "#ebdbb2" # base06
+    yellow: "#fabd2f" # base0A
