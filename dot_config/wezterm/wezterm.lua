@@ -2,10 +2,6 @@ local wezterm = require("wezterm")
 
 local config = {}
 
--------------------------
--- Colors & Appearance --
--------------------------
-
 -- Theme
 config.color_scheme = "Gruvbox dark, soft (base16)"
 
@@ -14,10 +10,10 @@ config.tab_bar_at_bottom = true
 
 -- Padding
 config.window_padding = {
-	left = 0,
-	right = 0,
-	top = 0,
-	bottom = 0,
+	left = 7,
+	right = 7,
+	top = 7,
+	bottom = 7,
 }
 
 -- Window
