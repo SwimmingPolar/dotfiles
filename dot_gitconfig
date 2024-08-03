@@ -4,3 +4,7 @@
 [user]
 	email = swimming.polar@gmail.com
 	name = YDH
+ [alias]
+    ignore = update-index --assume-unchanged
+    unignore = update-index --no-assume-unchanged
+    ignored = !git ls-files -v | grep "^[[:lower:]]"
