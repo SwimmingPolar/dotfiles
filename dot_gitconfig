@@ -1,0 +1,6 @@
+[credential]
+	helper = manager
+	debug = false
+[user]
+	email = swimming.polar@gmail.com
+	name = YDH
