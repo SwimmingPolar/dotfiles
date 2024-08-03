@@ -16,12 +16,11 @@ return {
     -- but you can further control the types of nodes that should always be fully expanded
     expand = { -- for treesitter, we we always try to expand to the top-most ancestor with these types
       "function",
-      "method",
     },
     exclude = {}, -- exclude these filetypes
   },
   config = function(_, opts)
     require("twilight").setup(opts)
-    require("twilight").enable()
+    -- require("twilight").enable()
   end,
 }
