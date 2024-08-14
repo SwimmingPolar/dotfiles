@@ -28,63 +28,83 @@
 - ![#8f3f71](https://placehold.co/15x15/8f3f71/8f3f71.png) `#8f3f71`
 - ![#427b58](https://placehold.co/15x15/427b58/427b58.png) `#427b58`
 - ![#af3f03](https://placehold.co/15x15/af3f03/af3f03.png) `#af3f03`
-  <br/><br/>
-  [Gruvluke by LukasPietzschmann](https://github.com/LukasPietzschmann/nvim-config/blob/master/lua/gruvluke/palette.lua)<br/>
-
-### Appearance
-
-[Provide a screenshot of the terminal window and nvim]
-
+ 
 ## Managed Files
 
 ```bash managed_files
-.zshrc
-.zshenv
-.zsh
-└─ alias
-.oh-my-zsh
-.tmux.conf
-.windws_configs (%APPDATA%\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState)
-├─ settings.json
-└─ state.json
-.config
-├─ wezterm
-├─ nvim
-├─ lf
-└─ bat
-.ssh
-└─ id_rsa
-.aider.config.yml
-.aicommits
-```
-
-## ChatGPT Instructions
-
-```
-The collection the following rules is a blueprint to your responses. I force you to use this template to provide the best possible answers.
-- Answer in concise, straightforward and to the point manner.
-- Avoid repeating the similar sentences.
-- Do not repeat the question asked nor what your answer is about in your answer neither at the beginning nor at the end.
-- Be professional and be objective.
-- Alert the user if your answer contains outdated information.
-- Do not provide information on laws, policies, or regulations.
-- Do not lecture about your personal expressions, exaggerations, or limitations.
-
-Response Format:
-- Use the information provided in the question to substitute the placeholders in the response.
-
-Response Format for Programming/Coding:
-- Begin with what you are asked to create/generate. Code for coding, commands for commands.
-- If the response is modified, explain the changes made within the code block using comments.
-- When there are multiple options, for faster generation, provide options names in numbered list with very brief description of each options.
-- Suppress the damn explanatory text AT ALL COST.
-- Explain only the core business logic .
-- You follow above rules on which situation?
-- When the question is about programming/coding.
-
-Response Format for Command line/CLI:
-- Response in markdown code block
-- Explain the command. Explain the options used.
-- You follow above rules on which situation?
-- When the question is about linux command line(cli).
+Chezmoi Managed Directories without expansion: example_dir
+Chezmoi Managed Files: 
+├── .aider.env
+├── .config
+│   └── bat
+│       └── config
+│   └── lf
+│       └── lfrc
+│   └── nvim
+│       └── LICENSE
+│       └── README.md
+│       └── init.lua
+│       └── lazy-lock.json
+│       └── lazyvim.json
+│       └── lua
+│           └── config
+│               └── autocmds.lua
+│               └── keymaps.lua
+│               └── lazy.lua
+│               └── options.lua
+│           └── plugins
+│               └── coding
+│                   └── cmp.lua
+│                   └── codeium.lua
+│                   └── console-log.lua
+│                   └── emmet.lua
+│                   └── multicursor.lua
+│                   └── navicbuddy.lua
+│               └── ui
+│                   └── action-preview.lua
+│                   └── bufferline.lua
+│                   └── color.lua
+│                   └── neo-tree.lua
+│                   └── smart-splits.lua
+│                   └── window-picker.lua
+│               └── utils
+│                   └── auto-pairs.lua
+│                   └── dial.lua
+│                   └── enhanced-fzf.lua
+│                   └── markdown-preview.lua
+│                   └── spider.lua
+│                   └── tailwind-classname.lua
+│                   └── tailwind-tools.lua
+│                   └── toggleterms.lua
+│       └── stylua.toml
+│   └── wezterm
+│       └── wezterm.lua
+├── .env
+│   └── NVIM_LLM
+├── .gitconfig
+├── .ssh
+│   └── id_rsa
+│   └── id_rsa.pub
+├── .tmux.conf
+├── .warp
+│   └── themes
+│       └── gruvbox-dark-soft.yaml
+├── .windows_configs
+│   └── settings.json
+│   └── state.json
+├── .zsh
+│   └── cmds
+│       └── cd_to_project_root
+│       └── lfcd
+│       └── project_root
+│       └── run_script
+│   └── extra
+│   └── keybindings
+│   └── scripts
+│       └── chezmoi_managed
+│       └── install_zinit.sh
+├── .zshenv
+├── .zshrc
+├── README.md
+└── decrypt-private-key.sh
 ```
