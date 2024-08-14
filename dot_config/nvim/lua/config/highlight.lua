@@ -1,0 +1,51 @@
+-- NeoTreeGitUntrackedxxx guifg=#c099ff
+-- NeoTreeGitModifiedxxx guifg=#ff966c
+-- NeoTreeNormalxxx guifg=#828bb8 guibg=#1e2030
+-- NeoTreeTabActivexxx cterm=bold gui=bold guifg=#82aaff guibg=#1e2030
+-- NeoTreeNormalNCxxx guifg=#828bb8 guibg=#1e2030
+-- NeoTreeGitStagedxxx guifg=#4fd6be
+-- NeoTreeFileNamexxx guifg=#828bb8
+-- NeoTreeDimTextxxx guifg=#3b4261
+-- NeoTreeTabSeparatorInactivexxx guifg=#222436 guibg=#181a26
+-- NeoTreeTabSeparatorActivexxx guifg=#82aaff guibg=#1e2030
+-- NeoTreeTabInactivexxx guifg=#545c7e guibg=#181a26
+-- NeoTreeSignColumnxxx links to SignColumn
+-- NeoTreeStatusLinexxx links to StatusLine
+-- NeoTreeStatusLineNCxxx links to StatusLineNC
+-- NeoTreeVertSplitxxx links to VertSplit
+-- NeoTreeWinSeparatorxxx links to WinSeparator
+-- NeoTreeEndOfBufferxxx links to EndOfBuffer
+-- NeoTreeFloatBorderxxx links to FloatBorder
+-- NeoTreeFloatNormalxxx links to NormalFloat
+-- NeoTreeFloatTitlexxx guifg=#828bb8 guibg=#1e2030
+-- NeoTreeTitleBarxxx guifg=#1e2030 guibg=#589ed7
+-- NeoTreeBufferNumberxxx links to SpecialChar
+-- NeoTreeMessagexxx gui=italic guifg=#3c4058
+-- NeoTreeFadeText1xxx guifg=#626262
+-- NeoTreeFadeText2xxx guifg=#444444
+-- NeoTreeDotfilexxx guifg=#626262
+-- NeoTreeHiddenByNamexxx links to NeoTreeDotfile
+-- NeoTreeCursorLinexxx links to CursorLine
+-- NeoTreeDirectoryNamexxx links to Directory
+-- NeoTreeDirectoryIconxxx links to Directory
+-- NeoTreeFileIconxxx links to NeoTreeDirectoryIcon
+-- NeoTreeFileNameOpenedxxx gui=bold
+-- NeoTreeSymbolicLinkTargetxxx links to NeoTreeFileName
+-- NeoTreeFilterTermxxx links to SpecialChar
+-- NeoTreeRootNamexxx gui=bold,italic
+-- NeoTreeIndentMarkerxxx links to NeoTreeDimText
+-- NeoTreeExpanderxxx links to NeoTreeDimText
+-- NeoTreeModifiedxxx guifg=#d7d787
+-- NeoTreeWindowsHiddenxxx links to NeoTreeDotfile
+-- NeoTreePreviewxxx links to Search
+-- NeoTreeGitAddedxxx links to GitSignsAdd
+-- NeoTreeGitDeletedxxx links to GitSignsDelete
+-- NeoTreeGitConflictxxx gui=bold,italic guifg=#ff8700
+-- NeoTreeGitIgnoredxxx links to NeoTreeDotfile
+-- NeoTreeGitRenamedxxx links to NeoTreeGitModified
+-- NeoTreeGitUnstagedxxx links to NeoTreeGitConflict
+-- NeoTreeFileStatsxxx guifg=#464a66
+-- NeoTreeFileStatsHeaderxxx gui=bold,italic guifg=#757b95
+-- NeoTreeGitUntracked_68xxx guifg=#8d73be
+-- NeoTreeGitUntracked_60xxx guifg=#806aae
+-- NeoTreeGitUntracked_35xxx guifg=#594c7c
