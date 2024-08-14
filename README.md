@@ -28,32 +28,83 @@
 - ![#8f3f71](https://placehold.co/15x15/8f3f71/8f3f71.png) `#8f3f71`
 - ![#427b58](https://placehold.co/15x15/427b58/427b58.png) `#427b58`
 - ![#af3f03](https://placehold.co/15x15/af3f03/af3f03.png) `#af3f03`
-  <br/><br/>
-  [Gruvluke by LukasPietzschmann](https://github.com/LukasPietzschmann/nvim-config/blob/master/lua/gruvluke/palette.lua)<br/>
-
-### Appearance
-
-[Provide a screenshot of the terminal window and nvim]
-
+ 
 ## Managed Files
 
 ```bash managed_files
-.zshrc
-.zshenv
-.zsh
-└─ alias
-.oh-my-zsh
-.tmux.conf
-.windws_configs (%APPDATA%\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState)
-├─ settings.json
-└─ state.json
-.config
-├─ wezterm
-├─ nvim
-├─ lf
-└─ bat
-.ssh
-└─ id_rsa
-.aider.config.yml
-.aicommits
+Chezmoi Managed Directories without expansion: example_dir
+Chezmoi Managed Files: 
+├── .aider.env
+├── .config
+│   └── bat
+│       └── config
+│   └── lf
+│       └── lfrc
+│   └── nvim
+│       └── LICENSE
+│       └── README.md
+│       └── init.lua
+│       └── lazy-lock.json
+│       └── lazyvim.json
+│       └── lua
+│           └── config
+│               └── autocmds.lua
+│               └── keymaps.lua
+│               └── lazy.lua
+│               └── options.lua
+│           └── plugins
+│               └── coding
+│                   └── cmp.lua
+│                   └── codeium.lua
+│                   └── console-log.lua
+│                   └── emmet.lua
+│                   └── multicursor.lua
+│                   └── navicbuddy.lua
+│               └── ui
+│                   └── action-preview.lua
+│                   └── bufferline.lua
+│                   └── color.lua
+│                   └── neo-tree.lua
+│                   └── smart-splits.lua
+│                   └── window-picker.lua
+│               └── utils
+│                   └── auto-pairs.lua
+│                   └── dial.lua
+│                   └── enhanced-fzf.lua
+│                   └── markdown-preview.lua
+│                   └── spider.lua
+│                   └── tailwind-classname.lua
+│                   └── tailwind-tools.lua
+│                   └── toggleterms.lua
+│       └── stylua.toml
+│   └── wezterm
+│       └── wezterm.lua
+├── .env
+│   └── NVIM_LLM
+├── .gitconfig
+├── .ssh
+│   └── id_rsa
+│   └── id_rsa.pub
+├── .tmux.conf
+├── .warp
+│   └── themes
+│       └── gruvbox-dark-soft.yaml
+├── .windows_configs
+│   └── settings.json
+│   └── state.json
+├── .zsh
+│   └── cmds
+│       └── cd_to_project_root
+│       └── lfcd
+│       └── project_root
+│       └── run_script
+│   └── extra
+│   └── keybindings
+│   └── scripts
+│       └── chezmoi_managed
+│       └── install_zinit.sh
+├── .zshenv
+├── .zshrc
+├── README.md
+└── decrypt-private-key.sh
 ```
