@@ -28,12 +28,12 @@
 - ![#8f3f71](https://placehold.co/15x15/8f3f71/8f3f71.png) `#8f3f71`
 - ![#427b58](https://placehold.co/15x15/427b58/427b58.png) `#427b58`
 - ![#af3f03](https://placehold.co/15x15/af3f03/af3f03.png) `#af3f03`
- 
+
 ## Managed Files
 
 ```bash managed_files
 Chezmoi Managed Directories without expansion: example_dir
-Chezmoi Managed Files: 
+Chezmoi Managed Files:
 ├── .aider.env
 ├── .config
 │   └── bat
@@ -41,8 +41,6 @@ Chezmoi Managed Files:
 │   └── lf
 │       └── lfrc
 │   └── nvim
-│       └── LICENSE
-│       └── README.md
 │       └── init.lua
 │       └── lazy-lock.json
 │       └── lazyvim.json
@@ -54,31 +52,35 @@ Chezmoi Managed Files:
 │               └── options.lua
 │           └── plugins
 │               └── coding
-│                   └── cmp.lua
 │                   └── codeium.lua
-│                   └── console-log.lua
+│                   └── debugprint.lua
 │                   └── emmet.lua
-│                   └── multicursor.lua
-│                   └── navicbuddy.lua
+│                   └── lua-snip.lua
+│               └── disabled_plugins.lua
 │               └── ui
-│                   └── action-preview.lua
 │                   └── bufferline.lua
 │                   └── color.lua
-│                   └── neo-tree.lua
+│                   └── dashboard.lua
+│                   └── neotree.lua
+│                   └── notify.lua
 │                   └── smart-splits.lua
+│                   └── telescope.lua
 │                   └── window-picker.lua
+│                   └── zenmode.lua
 │               └── utils
 │                   └── auto-pairs.lua
 │                   └── dial.lua
-│                   └── enhanced-fzf.lua
 │                   └── markdown-preview.lua
+│                   └── multicursor.lua
+│                   └── navbuddy.lua
 │                   └── spider.lua
 │                   └── tailwind-classname.lua
 │                   └── tailwind-tools.lua
-│                   └── toggleterms.lua
+│                   └── text-case.lua
 │       └── stylua.toml
 │   └── wezterm
 │       └── wezterm.lua
+│                   └── cmp.lua
 ├── .env
 │   └── NVIM_LLM
 ├── .gitconfig
