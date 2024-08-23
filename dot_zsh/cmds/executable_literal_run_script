@@ -1,0 +1,35 @@
+#! /bin/bash
+
+function run_script() {
+  if (($# < 1)); then
+    echo "Usage: s <script_name>"
+    return 1
+  fi
+
+  local script=$1 script_name
+  local scripts_dir_path="$HOME/.zsh/scripts"
+
+  script_name="$(basename "$1")"
+
+  if [[ -f "./$script_name" ]]; then
+    script="./$script_name"
+  elif [[ -f "$scripts_dir_path/$script_name" ]]; then
+    script="$scripts_dir_path/$script_name"
+  elif [[ -f "$1" ]]; then
+    script="$1"
+  # Check if the script given is a direcotory
+  elif [[ -d "$1" ]]; then
+    echo "$script_name is a directory"
+    return 1
+  else
+    echo "$scripts_dir_path/$script_name"
+    echo "$1: does not exist"
+    return 1
+  fi
+
+  # Check if the script is a directory
+
+  bash -c "$script"
+}
+
+alias s=run_script
