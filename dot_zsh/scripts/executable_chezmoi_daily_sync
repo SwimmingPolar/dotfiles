@@ -10,6 +10,6 @@ list=(
 )
 
 for item in "${list[@]}"; do
-  chezmoi forget "$HOME/$item" -- --all
+  chezmoi forget "$HOME/$item" --yes
   chezmoi add "$HOME/$item"
 done
