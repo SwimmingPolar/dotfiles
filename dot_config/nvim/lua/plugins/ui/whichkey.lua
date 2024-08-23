@@ -3,11 +3,15 @@ return {
   event = "VeryLazy",
   opts = {
     preset = "modern",
+    icons = {
+      mappings = false,
+      show_help = false,
+    },
     win = {
       title = false,
       padding = {
-        2,
-        3,
+        1,
+        1,
       },
     },
   },

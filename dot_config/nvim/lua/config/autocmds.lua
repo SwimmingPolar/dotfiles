@@ -17,7 +17,6 @@ vim.api.nvim_set_hl(0, "SpellBad", {
   sp = "#8bba7f",
   undercurl = true,
 })
-
 vim.api.nvim_set_hl(0, "NormalFloat", {})
 vim.api.nvim_set_hl(0, "FloatBorder", {})
 
