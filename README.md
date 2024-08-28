@@ -32,12 +32,25 @@
 ## Managed Files
 
 ```bash managed_files
-Chezmoi Managed Directories without expansion: example_dir
 Chezmoi Managed Files:
 ├── .aider.env
 ├── .config
 │   └── bat
 │       └── config
+│   └── color.palette
+│   └── karabiner
+│       └── assets
+│           └── complex_modifications
+│               └── 1719980229.json
+│               └── 1720593300.json
+│               └── 1723599788.json
+│       └── automatic_backups
+│           └── karabiner_20240703.json
+│           └── karabiner_20240710.json
+│           └── karabiner_20240711.json
+│           └── karabiner_20240810.json
+│           └── karabiner_20240814.json
+│       └── karabiner.json
 │   └── lf
 │       └── lfrc
 │   └── nvim
@@ -47,46 +60,57 @@ Chezmoi Managed Files:
 │       └── lua
 │           └── config
 │               └── autocmds.lua
+│               └── options.lua
 │               └── keymaps.lua
 │               └── lazy.lua
-│               └── options.lua
 │           └── plugins
 │               └── coding
+│                   └── cmp.lua
 │                   └── codeium.lua
 │                   └── debugprint.lua
 │                   └── emmet.lua
+│                   └── lsp.lua
 │                   └── lua-snip.lua
+│                   └── mason.lua
 │               └── disabled_plugins.lua
+│               └── leetcode.lua
 │               └── ui
 │                   └── bufferline.lua
 │                   └── color.lua
 │                   └── dashboard.lua
 │                   └── neotree.lua
+│                   └── noice.lua
 │                   └── notify.lua
 │                   └── smart-splits.lua
 │                   └── telescope.lua
+│                   └── twilight.lua
+│                   └── whichkey.lua
 │                   └── window-picker.lua
 │                   └── zenmode.lua
 │               └── utils
 │                   └── auto-pairs.lua
 │                   └── dial.lua
+│                   └── harpoon.lua
 │                   └── markdown-preview.lua
 │                   └── multicursor.lua
 │                   └── navbuddy.lua
-│                   └── spider.lua
-│                   └── tailwind-classname.lua
+│                   └── resession.lua
+│                   └── tabout.lua
 │                   └── tailwind-tools.lua
 │                   └── text-case.lua
+│                   └── vim-tmux.lua
 │       └── stylua.toml
 │   └── wezterm
 │       └── wezterm.lua
-│                   └── cmp.lua
+│       └── wezterm.lua-e
 ├── .env
 │   └── NVIM_LLM
 ├── .gitconfig
 ├── .ssh
 │   └── id_rsa
 │   └── id_rsa.pub
+├── .tmux
+│   └── theme.tmux.conf
 ├── .tmux.conf
 ├── .warp
 │   └── themes
@@ -95,16 +119,24 @@ Chezmoi Managed Files:
 │   └── settings.json
 │   └── state.json
 ├── .zsh
-│   └── cmds
-│       └── cd_to_project_root
-│       └── lfcd
-│       └── project_root
-│       └── run_script
-│   └── extra
+│   └── data
+│       └── goog.json
+│   └── hooks
+│       └── preexec
 │   └── keybindings
 │   └── scripts
+│       └── split_tunnel.up
+│       └── defaults
+│       └── chezmoi_daily_sync
 │       └── chezmoi_managed
-│       └── install_zinit.sh
+│       └── install_cli_cmds.sh
+│   └── cmds
+│       └── project_root
+│       └── cd_to_project_root
+│       └── lfcd
+│       └── run_script
+│       └── text_color
+│       └── zhooks
 ├── .zshenv
 ├── .zshrc
 ├── README.md
