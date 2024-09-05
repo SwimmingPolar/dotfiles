@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Define color functions
+black() { echo -e "$(tput setaf 0)$*$(tput sgr0)"; }
+red() { echo -e "$(tput setaf 1)$*$(tput sgr0)"; }
+green() { echo -e "$(tput setaf 2)$*$(tput sgr0)"; }
+yellow() { echo -e "$(tput setaf 3)$*$(tput sgr0)"; }
+blue() { echo -e "$(tput setaf 4)$*$(tput sgr0)"; }
+magenta() { echo -e "$(tput setaf 5)$*$(tput sgr0)"; }
+cyan() { echo -e "$(tput setaf 6)$*$(tput sgr0)"; }
+white() { echo -e "$(tput setaf 7)$*$(tput sgr0)"; }
+
+# Define bright color functions
+bright_black() { echo -e "$(tput setaf 8)$*$(tput sgr0)"; }
+bright_red() { echo -e "$(tput setaf 9)$*$(tput sgr0)"; }
+bright_green() { echo -e "$(tput setaf 10)$*$(tput sgr0)"; }
+bright_yellow() { echo -e "$(tput setaf 11)$*$(tput sgr0)"; }
+bright_blue() { echo -e "$(tput setaf 12)$*$(tput sgr0)"; }
+bright_magenta() { echo -e "$(tput setaf 13)$*$(tput sgr0)"; }
+bright_cyan() { echo -e "$(tput setaf 14)$*$(tput sgr0)"; }
+bright_white() { echo -e "$(tput setaf 15)$*$(tput sgr0)"; }
