@@ -1,31 +1,7 @@
 #!/bin/bash
 
-remove_term_padding() {
-    emulate -L zsh
+#example_hook(){
+#}
 
-    # check if the command is nvim(neovim)
-    args=$(echo "$1" | awk '{ print $1 }')
-    cmd="$(type "$args" | awk '{print $NF}')"
-
-    if [[ "$cmd" == "nvim" ]] || [[ "$cmd" == "neovim" ]]; then
-        sed -i -e 's/config.window_padding.left.*/config.window_padding.left = 0/' "$HOME/.config/wezterm/wezterm.lua"
-        sed -i -e 's/config.window_padding.right.*/config.window_padding.right = 0/' "$HOME/.config/wezterm/wezterm.lua"
-        sed -i -e 's/config.window_padding.top.*/config.window_padding.top = 0/' "$HOME/.config/wezterm/wezterm.lua"
-        sed -i -e 's/config.window_padding.bottom.*/config.window_padding.bottom = 0/' "$HOME/.config/wezterm/wezterm.lua"
-    fi
-}
-# add-zsh-hook preexec remove_term_padding
-
-add_term_padding() {
-    emulate -L zsh
-
-    px='"0.5cell"'
-    py='"0.2cell"'
-
-    sed -i -e "s/config.window_padding.left.*/config.window_padding.left = $px/" "$HOME/.config/wezterm/wezterm.lua"
-    sed -i -e "s/config.window_padding.right.*/config.window_padding.right = $px/" "$HOME/.config/wezterm/wezterm.lua"
-    sed -i -e "s/config.window_padding.top.*/config.window_padding.top = $py/" "$HOME/.config/wezterm/wezterm.lua"
-    sed -i -e "s/config.window_padding.bottom.*/config.window_padding.bottom = $py/" "$HOME/.config/wezterm/wezterm.lua"
-}
 # autoload -Uz add-zsh-hook
-# add-zsh-hook precmd add_term_padding
+# add-zsh-hook precmd example_hook
