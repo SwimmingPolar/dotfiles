@@ -1,5 +1,12 @@
+-- tailwind-tools.lua
 return {
     "luckasRanarison/tailwind-tools.nvim",
-    dependencies = { "nvim-treesitter/nvim-treesitter", "neovim/nvim-lspconfig" },
-    opts = {},
+    name = "tailwind-tools",
+    build = ":UpdateRemotePlugins",
+    dependencies = {
+        "nvim-treesitter/nvim-treesitter",
+        "nvim-telescope/telescope.nvim", -- optional
+        "neovim/nvim-lspconfig", -- optional
+    },
+    opts = {}, -- your configuration
 }

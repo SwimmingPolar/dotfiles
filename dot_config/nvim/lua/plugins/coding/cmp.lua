@@ -1,71 +1,8 @@
 ---@diagnostic disable: missing-fields
+require("config.ui")
 
-local source_mapping = {
-    buffer = "[Buffer]",
-    nvim_lsp = "[LSP]",
-    nvim_lua = "[Lua]",
-    codeium = "[Codeium]",
-    copilot = "[Copilot]",
-    luasnip = "[Snippet]",
-    path = "[Path]",
-    spell = "[Spell]",
-    emoji = "[Emoji]",
-}
-local icons = {
-    Namespace = "󰌗 ",
-    Text = "󰉿 ",
-    Method = "󰆧 ",
-    Function = "󰆧 ",
-    Constructor = " ",
-    Field = "󰜢 ",
-    Variable = "󰀫 ",
-    Class = "󰠱 ",
-    Interface = " ",
-    Module = " ",
-    Property = "󰜢 ",
-    Unit = "󰑭 ",
-    Value = "󰎠 ",
-    Enum = " ",
-    Keyword = "󰌋 ",
-    Snippet = " ",
-    Color = "󰏘 ",
-    File = "󰈚 ",
-    Reference = "󰈇 ",
-    Folder = "󰉋 ",
-    EnumMember = " ",
-    Constant = "󰏿 ",
-    Struct = "󰙅 ",
-    Event = " ",
-    Operator = "󰆕 ",
-    TypeParameter = "󰊄 ",
-    Table = " ",
-    Object = "󰅩 ",
-    Tag = " ",
-    Array = "[] ",
-    Boolean = " ",
-    Number = " ",
-    Null = "󰟢 ",
-    Supermaven = " ",
-    String = "󰉿 ",
-    Calendar = " ",
-    Watch = "󰥔 ",
-    Package = " ",
-    Copilot = " ",
-    Codeium = " ",
-    TabNine = " ",
-}
-local function border(hl_name)
-    return {
-        { "╭", hl_name },
-        { "─", hl_name },
-        { "╮", hl_name },
-        { "│", hl_name },
-        { "╯", hl_name },
-        { "─", hl_name },
-        { "╰", hl_name },
-        { "│", hl_name },
-    }
-end
+local WIDE_HEIGHT = 40
+
 return {
     "hrsh7th/nvim-cmp",
     dependencies = {
@@ -84,37 +21,8 @@ return {
         local cmp = require("cmp")
         local luasnip = require("luasnip")
         local lspkind = require("lspkind")
-
-        local lspkind_comparator = function(conf)
-            local lsp_types = require("cmp.types").lsp
-            return function(entry1, entry2)
-                if entry1.source.name ~= "nvim_lsp" then
-                    if entry2.source.name == "nvim_lsp" then
-                        return false
-                    else
-                        return nil
-                    end
-                end
-                local kind1 = lsp_types.CompletionItemKind[entry1:get_kind()]
-                local kind2 = lsp_types.CompletionItemKind[entry2:get_kind()]
-                if kind1 == "Variable" and entry1:get_completion_item().label:match("%w*=") then
-                    kind1 = "Parameter"
-                end
-                if kind2 == "Variable" and entry2:get_completion_item().label:match("%w*=") then
-                    kind2 = "Parameter"
-                end
-
-                local priority1 = conf.kind_priority[kind1] or 0
-                local priority2 = conf.kind_priority[kind2] or 0
-                if priority1 == priority2 then
-                    return nil
-                end
-                return priority2 < priority1
-            end
-        end
-        local label_comparator = function(entry1, entry2)
-            return entry1.completion_item.label < entry2.completion_item.label
-        end
+        local icons = vim.g.icons
+        local source_mapping = vim.g.source_mapping
 
         opts.completion.autocomplete = {
             cmp.TriggerEvent.TextChanged,
@@ -141,17 +49,24 @@ return {
         }
         opts.window = {
             completion = {
-                border = border("CmpBorder"),
+                border = vim.fn.round_border("CmpBorder"),
                 winhighlight = "Normal:CmpPmenu,FloatBorder:CmpPmenuBorder,CursorLine:PmenuSel,Search:None",
                 scrollbar = false,
+                winblend = 0,
+                scrolloff = 0,
+                col_offset = 0,
+                side_padding = 1,
             },
             documentation = {
-                border = border("CmpBorder"),
+                border = vim.fn.round_border("CmpBorder"),
                 winhighlight = "Normal:CmpBorder",
+                max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
+                max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
+                winblend = vim.o.pumblend,
             },
         }
         opts.view = {
-            entries = { name = "custom", selection_order = "near_cursor", follow_cursor = true },
+            entries = { name = "custom", selection_order = "top_down", follow_cursor = false },
             docs = {
                 auto_open = false,
             },
@@ -160,7 +75,7 @@ return {
             {
                 name = "codeium",
                 group_index = 2,
-                max_item_count = 3,
+                max_item_count = 5,
                 entry_filter = function(entry, ctx)
                     return not entry.exact
                 end,
@@ -168,7 +83,7 @@ return {
             {
                 name = "nvim_lsp",
                 group_index = 2,
-                max_item_count = 20,
+                max_item_count = 30,
                 entry_filter = function(entry, ctx)
                     local open_paren = ctx.cursor_before_line:sub(-1)
                     local close_paren = ctx.cursor_after_line

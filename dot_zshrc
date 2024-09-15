@@ -119,9 +119,22 @@ alias leetcode="nvim leetcode.nvim"
 alias so="source"
 alias czf="chezmoi forget"
 alias cza="chezmoi add"
+alias cz="chezmoi"
 alias harlequin="harlequin --theme zenburn"
 alias hlq="harlequin"
 alias cdr='cd "$(git rev-parse --show-toplevel 2>/dev/null || echo "./")"'
+alias lgit="lazygit"
+alias lgt="lazygit"
+alias lg="lazygit"
+alias tmpdir="cd $(mktemp -d)"
+alias tempdir="cd $(mktemp -d)"
+alias top="bpytop"
+alias clip="pbcopy"
+# AI assistant
+alias how='_how(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; _how'
+alias code="_code(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %code% -c "$@" | tee >(pbcopy) }; _code"
+alias explain="aichat -m openrouter:anthropic/claude-3.5-sonnet -r %explain-shell%"
+alias what="aichat -m openrouter:anthropic/claude-3.5-sonnet"
 
 # Terminal Padding Keybindings
 remove_terminal_padding(){
@@ -166,6 +179,17 @@ bindkey -M viins '\es' sesh-sessions
 
 # Emacs mode
 bindkey -e 
+
+# open neovim (F12)
+open_neovim() {
+    # check if on real terminal or not
+    if [[ -z $STY ]]; then
+        nv
+    fi
+}
+zle -N open_neovim
+bindkey -r '\e[24~'
+bindkey '\e[24~' open_neovim
 
 # zoxide init
 eval "$(zoxide init zsh)"

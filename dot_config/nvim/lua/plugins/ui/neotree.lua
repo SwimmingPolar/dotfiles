@@ -3,6 +3,30 @@ return {
     opts = {
         window = {
             width = 32,
+            mappings = {
+                ["l"] = function(state)
+                    local node = state.tree:get_node()
+
+                    -- before updated, check if expanded or not
+                    local is_expanded = node:is_expanded()
+                    if not is_expanded then
+                        local M = state.commands
+                        M.open(state)
+                    end
+
+                    -- if the node is dir and has children
+                    -- move cur 1 line down
+                    if node.type == "directory" then
+                        local children = vim.fn.readdir(node.path)
+                        local has_children = #children > 0
+                        if has_children then
+                            local cur = vim.api.nvim_win_get_cursor(0)
+                            local row, col = unpack(cur)
+                            vim.api.nvim_win_set_cursor(0, { row + 1, col })
+                        end
+                    end
+                end,
+            },
         },
         buffers = {
             follow_current_file = {

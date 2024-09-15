@@ -11,3 +11,5 @@ let @c = "/const.*= \rztf(\e%j0ztm1M"
 let @R = "?return\rzzm0"
 let @E = "\e/useeffect\rztV%"
 ]])
+
+vim.cmd("autocmd FileType help setlocal number")
