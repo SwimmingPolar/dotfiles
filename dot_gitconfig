@@ -5,9 +5,11 @@
     name = YDH
     email = swimming.polar@gmail.com
 
+[split-diffs]
+    theme-name = github-light
+
 [alias]
     ignore = update-index --assume-unchanged
     unignore = update-index --no-assume-unchanged
     ignored = !git ls-files -v | grep "^[[:lower:]]"
-[core]
-	pager = git-split-diffs --color | less -RFX
+

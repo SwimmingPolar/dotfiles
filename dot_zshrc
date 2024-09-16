@@ -132,9 +132,9 @@ alias tempdir="cd $(mktemp -d)"
 alias top="bpytop"
 alias clip="pbcopy"
 # AI assistant
-alias cli='_how(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; _how'
-alias how='_how(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; _how'
-alias what='_how(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; _how'
+alias cli='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; f'
+alias how='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; f'
+alias what='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; f'
 alias explain="aichat -m openrouter:anthropic/claude-3.5-sonnet -r %explain-shell%"
 alias ask="explain"
 alias code="_code(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %code% -c "$@" | tee >(pbcopy) }; _code"
@@ -142,6 +142,7 @@ alias gen="code"
 alias generate="code"
 alias ai="aichat -m openrouter:anthropic/claude-3.5-sonnet"
 alias sonnet="aichat -m openrouter:anthropic/claude-3.5-sonnet"
+alias sdf="git diff | git-split-diffs --color | less -RFX"
 
 # Terminal Padding Keybindings
 remove_terminal_padding(){
