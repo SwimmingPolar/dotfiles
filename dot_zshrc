@@ -42,7 +42,7 @@ zinit light-mode for \
 #############################################
 zinit ice depth=1; zinit light romkatv/powerlevel10k
 # disable zi from zinit to use zoxide's zi(interactive)
-zinit wait lucid atload'_zsh_autosuggest_start; unalias zi' light-mode for \
+zinit wait lucid atload'_zsh_autosuggest_start; unalias zi 2>/dev/null;' light-mode for \
     zsh-users/zsh-autosuggestions
 zinit light zsh-users/zsh-completions
 zinit light zdharma/history-search-multi-word
@@ -108,6 +108,7 @@ alias ls="eza"
 alias l="eza -1h --icons"
 alias ll="eza -1"
 alias lll="ll -l --icons"
+alias l3="lll"
 alias bat="bat --paging=always --style=full"
 alias escape="sed 's/\x1b\[[0-9;]*m//g'"
 alias aider="aider --env-file $HOME/.aider.env --sonnet"
@@ -131,10 +132,16 @@ alias tempdir="cd $(mktemp -d)"
 alias top="bpytop"
 alias clip="pbcopy"
 # AI assistant
+alias cli='_how(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; _how'
 alias how='_how(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; _how'
-alias code="_code(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %code% -c "$@" | tee >(pbcopy) }; _code"
+alias what='_how(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; _how'
 alias explain="aichat -m openrouter:anthropic/claude-3.5-sonnet -r %explain-shell%"
-alias what="aichat -m openrouter:anthropic/claude-3.5-sonnet"
+alias ask="explain"
+alias code="_code(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %code% -c "$@" | tee >(pbcopy) }; _code"
+alias gen="code"
+alias generate="code"
+alias ai="aichat -m openrouter:anthropic/claude-3.5-sonnet"
+alias sonnet="aichat -m openrouter:anthropic/claude-3.5-sonnet"
 
 # Terminal Padding Keybindings
 remove_terminal_padding(){

@@ -27,7 +27,7 @@ config.window_background_opacity = 0.925
 
 -- Font
 config.font = wezterm.font_with_fallback({
-	{ family = "JetBrains Mono NL", italic = false, weight = "Medium" },
+	{ family = "JetBrains Mono NL", italic = false, weight = "Regular" },
 })
 config.font_size = 13
 config.line_height = 1.175

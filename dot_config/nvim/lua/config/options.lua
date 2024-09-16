@@ -16,6 +16,7 @@ vim.opt.shiftwidth = 4 -- Number of auto-indent spaces
 vim.opt.smartindent = true -- Enable smart-indent
 vim.opt.smarttab = true -- Enable smart-tabs
 vim.opt.softtabstop = 4 -- Number of spaces per Tab
+vim.opt.tabstop = 4 -- Number of spaces per Tab
 vim.opt.undolevels = 1000 -- Number of undo levels
 vim.opt.swapfile = false -- No swap files
 vim.opt.virtualedit = "block" -- Virtual block mode
