@@ -39,6 +39,7 @@ config.cell_width = 0.9
 -- Experimental font size and line height
 config.font_size = 11
 config.line_height = 1.245
+config.window_background_opacity = 1
 
 config.keys = {
 	{
