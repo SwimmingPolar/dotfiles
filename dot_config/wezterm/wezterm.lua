@@ -36,6 +36,10 @@ config.freetype_load_target = "Light"
 config.freetype_render_target = "HorizontalLcd"
 config.cell_width = 0.9
 
+-- Experimental font size and line height
+config.font_size = 11
+config.line_height = 1.245
+
 config.keys = {
 	{
 		mods = "CTRL|SHIFT",
@@ -49,8 +53,6 @@ config.keys = {
 				overrides.enable_tab_bar = true
 			end
 			win:set_config_overrides(overrides)
-
-			wezterm.log_info("tab bar is " .. tostring(overrides.enable_tab_bar))
 		end),
 	},
 }
