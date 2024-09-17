@@ -34,7 +34,7 @@ return {
                 leave_dirs_open = true, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
             },
         },
-        popup_border_style = "rounded",
+        popup_border_style = "single",
         hide_root_node = true,
         filesystem = {
             bind_to_cwd = false,

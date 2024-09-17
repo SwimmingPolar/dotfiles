@@ -8,7 +8,16 @@ return {
     },
     opts = {
         presets = {
-            lsp_doc_border = true,
+            lsp_doc_border = {
+                views = {
+                    hover = {
+                        border = {
+                            style = "single",
+                        },
+                        position = { row = 2, col = 2 },
+                    },
+                },
+            },
         },
         lsp = {
             override = {

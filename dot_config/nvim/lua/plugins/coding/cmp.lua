@@ -49,7 +49,7 @@ return {
         }
         opts.window = {
             completion = {
-                border = vim.fn.round_border("CmpBorder"),
+                border = vim.fn.thin_border("CmpBorder"),
                 winhighlight = "Normal:CmpPmenu,FloatBorder:CmpPmenuBorder,CursorLine:PmenuSel,Search:None",
                 scrollbar = false,
                 winblend = 0,
@@ -58,7 +58,7 @@ return {
                 side_padding = 1,
             },
             documentation = {
-                border = vim.fn.round_border("CmpBorder"),
+                border = vim.fn.thin_border("CmpBorder"),
                 winhighlight = "Normal:CmpBorder",
                 max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
                 max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),

@@ -34,7 +34,7 @@ require("lazy").setup({
             loaded = " ",
             not_loaded = " ",
         },
-        border = "rounded",
+        border = "single",
         backdrop = 70,
     },
     performance = {},

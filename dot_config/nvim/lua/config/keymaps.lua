@@ -1,3 +1,5 @@
+require("config.ui")
+
 -- Easy scape from vim
 vim.cmd([[
 fun! SetupCommandAlias(from, to)
@@ -21,7 +23,9 @@ vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", { noremap = true, silent = true
 
 local Util = require("lazyvim.util")
 vim.keymap.set("n", "<C-/>", function()
-    Util.terminal(nil, { border = "rounded" })
+    Util.terminal(nil, {
+        border = "solid",
+    })
 end, { desc = "Term with border" })
 
 -- Remap H(High) M(Middle) L(Low)

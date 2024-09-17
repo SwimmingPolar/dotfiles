@@ -23,7 +23,7 @@ vim.opt.virtualedit = "block" -- Virtual block mode
 
 vim.diagnostic.config({
     float = {
-        border = "rounded",
+        border = "single",
     },
 })
 
