@@ -5,33 +5,33 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "fn + left_shift + j / scroll-down",
+                        "description": "FN + U to Page Down",
                         "manipulators": [
                             {
                                 "from": {
-                                    "key_code": "j",
+                                    "key_code": "u",
                                     "modifiers": {
-                                        "mandatory": ["fn", "left_shift"],
-                                        "optional": []
+                                        "mandatory": ["fn"],
+                                        "optional": ["caps_lock", "option"]
                                     }
                                 },
-                                "to": [{ "mouse_key": { "vertical_wheel": 64 } }],
+                                "to": [{ "key_code": "page_down" }],
                                 "type": "basic"
                             }
                         ]
                     },
                     {
-                        "description": "fn + left_shift + k / scroll-up",
+                        "description": "FN + Y to Page Up",
                         "manipulators": [
                             {
                                 "from": {
-                                    "key_code": "k",
+                                    "key_code": "y",
                                     "modifiers": {
-                                        "mandatory": ["fn", "left_shift"],
-                                        "optional": []
+                                        "mandatory": ["fn"],
+                                        "optional": ["caps_lock", "option"]
                                     }
                                 },
-                                "to": [{ "mouse_key": { "vertical_wheel": -64 } }],
+                                "to": [{ "key_code": "page_up" }],
                                 "type": "basic"
                             }
                         ]
