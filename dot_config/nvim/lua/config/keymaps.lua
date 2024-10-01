@@ -37,3 +37,6 @@ vim.keymap.set("n", ">", ":tabnext<cr>", { silent = true })
 vim.keymap.set("n", "<", ":tabprevious<cr>", { silent = true })
 
 vim.keymap.set("n", "<S-R>", ":e!<cr>", { silent = true })
+
+-- Remap floating terminal
+vim.keymap.set("n", "<C-/>", ":split term://%:p:h//bash", { silent = true })

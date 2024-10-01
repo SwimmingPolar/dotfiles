@@ -4,7 +4,7 @@ vim.cmd("language en_US")
 vim.cmd("autocmd BufEnter * set formatoptions-=cro")
 vim.cmd("autocmd BufEnter * setlocal formatoptions-=cro")
 
--- Function to set a named register with a macro
+--set named registers with macros
 vim.cmd([[
 let @C = "/export const.*= \rztf(\e%j0ztm1M"
 let @c = "/const.*= \rztf(\e%j0ztm1M"

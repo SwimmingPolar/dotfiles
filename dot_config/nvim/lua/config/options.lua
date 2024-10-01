@@ -20,6 +20,7 @@ vim.opt.tabstop = 4 -- Number of spaces per Tab
 vim.opt.undolevels = 1000 -- Number of undo levels
 vim.opt.swapfile = false -- No swap files
 vim.opt.virtualedit = "block" -- Virtual block mode
+vim.opt.list = false
 
 vim.diagnostic.config({
     float = {
@@ -27,6 +28,6 @@ vim.diagnostic.config({
     },
 })
 
-vim.g.loaded_node_provider = 0
-vim.g.loaded_perl_provider = 0
-vim.g.loaded_ruby_provider = 0
+vim.cmd([[let g:loaded_node_provider = 0]])
+vim.cmd([[let g:loaded_perl_provider = 0]])
+vim.cmd([[let g:loaded_ruby_provider = 0]])
