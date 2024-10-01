@@ -46,8 +46,15 @@ return {
         -- Split the name by "/" and set default name if there isn't one
         -- Or prefix the name with "~/"
         local project_name = get_repo_name()
-        local paths = vim.split(project_name, "/")
-        project_name = paths[#paths - 1] .. "/" .. paths[#paths]
+
+        local ok = pcall(function()
+            local paths = vim.split(project_name, "/")
+            project_name = paths[#paths - 1] .. "/" .. paths[#paths]
+        end)
+        if not ok then
+            project_name = ""
+        end
+
         if project_name == "" then
             project_name = "File Explorer"
         else

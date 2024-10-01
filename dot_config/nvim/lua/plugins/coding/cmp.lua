@@ -113,12 +113,10 @@ return {
         opts.performance = {
             max_view_entries = 32,
         }
-        opts.mapping = vim.tbl_extend("force", opts.mapping, {
+        local extended_mapping = vim.tbl_extend("force", opts.mapping, {
             ["<Tab>"] = cmp.mapping(function(fallback)
                 if luasnip.locally_jumpable(1) then
                     luasnip.jump(1)
-                elseif cmp.visible() then
-                    cmp.select_next_item()
                 else
                     fallback()
                 end
@@ -127,12 +125,12 @@ return {
             ["<S-Tab>"] = cmp.mapping(function(fallback)
                 if luasnip.locally_jumpable(-1) then
                     luasnip.jump(-1)
-                elseif cmp.visible() then
-                    cmp.select_prev_item()
                 else
                     fallback()
                 end
             end, { "i", "s" }),
         })
+        extended_mapping["<CR>"] = nil
+        opts.mapping = extended_mapping
     end,
 }
