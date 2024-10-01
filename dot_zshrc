@@ -1,5 +1,5 @@
 # If you come from bash you might have to change your $PATH.
-export PATH="$HOME/go/bin:$HOME/.zsh/scripts:/usr/local/go/bin:$HOME/.local/bin:$HOME/bin:/usr/local/bin:$HOME/.cargo/bin:$PATH"
+export PATH="$HOME/go:$HOME/go/bin:$HOME/.zsh/scripts:/usr/local/go/bin:$HOME/.local/bin:$HOME/bin:/usr/local/bin:$HOME/.cargo/bin:$PATH"
 
 # omz plugins configs mandatories(which should be invoked at the top of .zshrc)
 zstyle :omz:plugins:ssh-agent ssh-add-args --apple-load-keychain
@@ -65,6 +65,7 @@ dirs=(
   .zsh/cmds
   .zsh/keybindings
   .zsh/hooks
+  .env
 )
 ignore=(
   "."
@@ -96,7 +97,7 @@ done
 ########### Environment variables ###########
 #############################################
 export EDITOR=vim
-export MANPAGER="sh -c 'col -bx | bat -l man --style=full'"
+export MANPAGER="sh -c 'col -bx | bat  --wrap never -l man --style=full'"
 
 #############################################
 ################## Aliases ##################
@@ -107,13 +108,13 @@ export EZA_ICON_SPACING=2
 alias ls="eza"
 alias l="eza -1h --icons"
 alias ll="eza -1"
-alias lll="ll -l --icons"
+alias lll="ll -lh --icons"
+alias l2="ll"
 alias l3="lll"
 alias bat="bat --paging=always --style=full"
 alias escape="sed 's/\x1b\[[0-9;]*m//g'"
 alias aider="aider --env-file $HOME/.aider.env --sonnet"
 alias wcl="wezterm cli"
-alias cd="z"
 alias ltree="eza --icons=always --tree"
 alias lt="ltree"
 alias leetcode="nvim leetcode.nvim"
@@ -130,23 +131,30 @@ alias cdr='cd "$(git rev-parse --show-toplevel 2>/dev/null || echo ".")"'
 alias lgit="lazygit"
 alias lgt="lazygit"
 alias lg="lazygit"
-alias tmpdir="cd $(mktemp -d)"
-alias tempdir="cd $(mktemp -d)"
 alias top="bpytop"
 alias clip="pbcopy"
 # AI assistant
 alias cli='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; f'
-alias how='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; f'
-alias what='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; f'
+alias how='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "how $@" | tee >(pbcopy) }; f'
 alias explain="aichat -m openrouter:anthropic/claude-3.5-sonnet -r %explain-shell%"
-alias ask="explain"
-alias code="_code(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %code% -c "$@" | tee >(pbcopy) }; _code"
-alias gen="code"
+alias what='aichat -m openrouter:anthropic/claude-3.5-sonnet "$@"'
+alias ask="what"
+alias code='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r codas -c "$@" | tee >(pbcopy) | glow }; f'
 alias generate="code"
+alias gen="code"
 alias ai="aichat -m openrouter:anthropic/claude-3.5-sonnet"
 alias sonnet="aichat -m openrouter:anthropic/claude-3.5-sonnet"
 alias sdf="git diff | git-split-diffs --color | less -RFX"
 alias gdf="git diff | git-split-diffs --color | less -RFX"
+# about creating tempoarary file and directory
+export TMPFILE="/tmp/last-mktemp-path"
+alias mktmp="mktemp"
+alias tmpdir="f(){ export TMPDIR=$(mktemp -d); echo \"$TMPDIR\" > \"$TMPFILE\"; cd \"$TMPDIR\" }; f || return 1;"
+alias tempdir="tmpdir"
+alias cdtmp='cd "$(cat $TMPFILE)" || return 1'
+alias cdtemp="cdtmp"
+alias echotmp='cat "$TMPFILE" || return 1'
+alias echotemp="echotmp"
 
 # Terminal Padding Keybindings
 remove_terminal_padding(){
