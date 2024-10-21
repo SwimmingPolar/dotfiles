@@ -21,6 +21,7 @@ vim.opt.undolevels = 1000 -- Number of undo levels
 vim.opt.swapfile = false -- No swap files
 vim.opt.virtualedit = "block" -- Virtual block mode
 vim.opt.list = false
+vim.opt.cursorline = true
 
 vim.diagnostic.config({
     float = {

@@ -135,9 +135,9 @@ alias top="bpytop"
 alias clip="pbcopy"
 # AI assistant
 alias cli='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; f'
-alias how='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "how $@" | tee >(pbcopy) }; f'
+alias how='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "With Short answer: how $@" | tee >(pbcopy) }; f'
 alias explain="aichat -m openrouter:anthropic/claude-3.5-sonnet -r %explain-shell%"
-alias what='aichat -m openrouter:anthropic/claude-3.5-sonnet "$@"'
+alias what='aichat -m openrouter:anthropic/claude-3.5-sonnet "With short answer: what $@"'
 alias ask="what"
 alias code='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r codas -c "$@" | tee >(pbcopy) | glow }; f'
 alias generate="code"
@@ -148,8 +148,11 @@ alias sdf="git diff | git-split-diffs --color | less -RFX"
 alias gdf="git diff | git-split-diffs --color | less -RFX"
 # about creating tempoarary file and directory
 export TMPFILE="/tmp/last-mktemp-path"
+if [ ! -f "$TMPFILE" ]; then
+    touch "$TMPFILE"
+fi
 alias mktmp="mktemp"
-alias tmpdir="f(){ export TMPDIR=$(mktemp -d); echo \"$TMPDIR\" > \"$TMPFILE\"; cd \"$TMPDIR\" }; f || return 1;"
+alias tmpdir="f(){ export TMPDIR="$(mktemp -d)"; echo \"$TMPDIR\" > \"$TMPFILE\"; cd \"$(cat $TMPFILE)\" }; f || return 1;"
 alias tempdir="tmpdir"
 alias cdtmp='cd "$(cat $TMPFILE)" || return 1'
 alias cdtemp="cdtmp"
