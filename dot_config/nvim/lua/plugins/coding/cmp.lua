@@ -39,7 +39,7 @@ return {
                 local symbol = icons[kind] or lspkind.symbolic(vim_item.kind, { mode = "symbol" })
                 vim_item.kind = " " .. (symbol or "?") .. " " .. kind
                 vim_item.menu = source_mapping[entry.source.name]
-                return vim_item
+                return require("tailwindcss-colorizer-cmp").formatter(entry, vim_item)
             end,
         }
         opts.snippet = {
