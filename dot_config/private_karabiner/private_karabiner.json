@@ -5,6 +5,38 @@
             "complex_modifications": {
                 "rules": [
                     {
+                        "description": "fn + left_shirt + left_alt + j to Page Down",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "j",
+                                    "modifiers": {
+                                        "mandatory": ["fn", "left_shift", "left_alt"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [{ "key_code": "page_down" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "fn + left_shift + left_alt + k to Page Up",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "k",
+                                    "modifiers": {
+                                        "mandatory": ["fn", "left_shift", "left_alt"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [{ "key_code": "page_up" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "fn + left_shift + j / scroll-down",
                         "manipulators": [
                             {
