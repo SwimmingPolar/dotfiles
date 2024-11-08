@@ -13,6 +13,11 @@ end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
     spec = {
+        {
+            "folke/snacks.nvim",
+            priority = 1000,
+            lazy = false,
+        },
         { "LazyVim/LazyVim", import = "lazyvim.plugins" },
         { import = "plugins.coding" },
         { import = "plugins.ui" },
@@ -38,6 +43,18 @@ require("lazy").setup({
         backdrop = 70,
     },
     performance = {},
+    {
+        "nvim-treesitter/nvim-treesitter",
+        build = ":TSUpdate",
+    },
+})
+
+require("nvim-treesitter.configs").setup({
+    ensure_installed = { "astro", "tsx", "typescript", "html" },
+    auto_install = true,
+    highlight = {
+        enable = true,
+    },
 })
 
 -- load highlights

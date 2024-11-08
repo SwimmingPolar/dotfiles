@@ -28,7 +28,7 @@ return {
             cmp.TriggerEvent.TextChanged,
             cmp.TriggerEvent.InsertEnter,
         }
-        opts.preselect = cmp.PreselectMode.None
+        opts.completion.completeopt = "menu,menuone,noinsert,noselect,preview"
         opts.experimental.ghost_text = {
             hl = "LspCodeLens",
         }

@@ -4,14 +4,20 @@ local disabled_plugins = {
     "echasnovski/mini.pairs",
     "folke/persistence.nvim",
     "indent-blankline.nvim",
-    "nvim-tree/nvim-web-devicons",
+    "monaqa/dial.nvim",
+    {
+        "ThePrimeagen/harpoon",
+        branch = "harpoon2",
+    },
+    "akinsho/bufferline.nvim",
+    "folke/noice.nvim",
 }
 
 M = vim.tbl_map(function(plugin)
-    local plugin_config = {
-        plugin,
-    }
-    return plugin_config
+    local plugin_config = type(plugin) == "table" and plugin or { plugin }
+    return vim.tbl_extend("force", plugin_config, {
+        enabled = false,
+    })
 end, disabled_plugins)
 
 return M

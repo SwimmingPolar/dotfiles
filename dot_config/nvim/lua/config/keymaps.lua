@@ -12,8 +12,11 @@ call SetupCommandAlias("wQ","wq")
 call SetupCommandAlias("WQ","wq")
 ]])
 
+local Snacks = require("snacks")
 -- Remap C-x to close buffer
-vim.keymap.set("", "<C-x>", LazyVim.ui.bufremove, { desc = "Close the current buffer" })
+vim.keymap.set("", "<C-x>", function()
+    Snacks.bufdelete()
+end, { desc = "Close the current buffer" })
 
 -- Move current line
 vim.keymap.set("n", "<A-j>", ":m .+1<CR>==", { noremap = true, silent = true })
@@ -40,3 +43,6 @@ vim.keymap.set("n", "<S-R>", ":e!<cr>", { silent = true })
 
 -- Remap floating terminal
 vim.keymap.set("n", "<C-/>", ":split term://%:p:h//bash", { silent = true })
+
+-- Close neovim with F11
+vim.keymap.set("n", "<F11>", ":wqa!<CR>", { noremap = true, silent = true })

@@ -50,12 +50,12 @@ return {
         },
         sources = {
             "filesystem",
-            "document_symbols",
+            -- "document_symbols",
         },
         source_selector = {
             sources = {
                 { source = "filesystem" },
-                { source = "document_symbols" },
+                -- { source = "document_symbols" },
             },
             winbar = true,
             content_layout = "center",
