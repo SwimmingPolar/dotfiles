@@ -49,6 +49,7 @@ require("lazy").setup({
     },
 })
 
+-- needed to make treesitter work with Astro properly
 require("nvim-treesitter.configs").setup({
     ensure_installed = { "astro", "tsx", "typescript", "html" },
     auto_install = true,

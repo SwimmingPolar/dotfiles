@@ -1,6 +1,6 @@
 vim.cmd("language en_US")
 
--- Disable god damn annoying auto-commenting
+-- Disable goddamn annoying auto-commenting
 vim.cmd("autocmd BufEnter * set formatoptions-=cro")
 vim.cmd("autocmd BufEnter * setlocal formatoptions-=cro")
 
@@ -15,9 +15,9 @@ vim.cmd("autocmd BufEnter * setlocal formatoptions-=cro")
 -- set line numbers on help
 vim.cmd("autocmd FileType help setlocal number")
 
--- tailwind
+-- tailwind sort on save
 vim.api.nvim_create_autocmd("BufWritePost", {
-    group = vim.api.nvim_create_augroup("tailwind auto sort", { clear = true }),
+    group = vim.api.nvim_create_augroup("tailwind sort on save", { clear = true }),
     pattern = "*",
     callback = function()
         local lsp_clients = vim.lsp.get_clients()
