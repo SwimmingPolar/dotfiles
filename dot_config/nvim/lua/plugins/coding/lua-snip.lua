@@ -1,6 +1,7 @@
 return {
     "l3mon4d3/LuaSnip",
     dependencies = {
+        { "rafamadriz/friendly-snippets" },
         {
             "mlaursen/vim-react-snippets",
             config = function()

@@ -75,11 +75,12 @@ return {
             {
                 name = "codeium",
                 group_index = 2,
-                max_item_count = 5,
+                max_item_count = 3,
                 entry_filter = function(entry, ctx)
                     return not entry.exact
                 end,
             },
+            { name = "luasnip", group_index = 2, max_item_count = 3 },
             {
                 name = "nvim_lsp",
                 group_index = 2,
@@ -97,11 +98,11 @@ return {
                     end,
                 },
             },
-            { name = "luasnip", group_index = 2, max_item_count = 3 },
-            { name = "nvim_lua", group_index = 2 },
-            { name = "buffer", group_index = 2, max_item_count = 3 },
-            { name = "cmp-cmdline", group_index = 2, max_item_count = 3 },
             { name = "path", group_index = 2, max_item_count = 3 },
+            -- maybe I can replace buffrer with AI completion?
+            -- { name = "buffer", group_index = 2, max_item_count = 3 },
+            { name = "nvim_lua", group_index = 2 },
+            { name = "cmp-cmdline", group_index = 2, max_item_count = 3 },
         }
         opts.matching = {
             disallow_fuzzy_matching = false,
