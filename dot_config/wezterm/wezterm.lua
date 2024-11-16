@@ -3,6 +3,9 @@ local wezterm = require("wezterm")
 local config = wezterm.config_builder()
 config.default_cwd = "~"
 
+-- FPS
+config.max_fps = 240
+
 -- Theme
 config.color_scheme = "Gruvbox dark, soft (base16)"
 
