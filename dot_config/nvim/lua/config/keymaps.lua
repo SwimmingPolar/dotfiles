@@ -44,5 +44,5 @@ vim.keymap.set("n", "<S-R>", ":e!<cr>", { silent = true })
 -- Remap floating terminal
 vim.keymap.set("n", "<C-/>", ":split term://%:p:h//bash", { silent = true })
 
--- Close neovim with F11
-vim.keymap.set("n", "<F11>", ":wqa!<CR>", { noremap = true, silent = true })
+-- Close neovim with F12
+vim.keymap.set("n", "<F12>", ":wqa!<CR>", { noremap = true, silent = true })

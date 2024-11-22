@@ -1,3 +1,38 @@
+---Need some kind of heuristics to determine if the
+---target buffer is a real file or not. For now, is as follow:
+local function is_real_file()
+    local bufnr = vim.api.nvim_get_current_buf()
+    -- check if buf is nil or is not number which is not correct bufnr
+    if not bufnr or type(bufnr) ~= "number" then
+        return false
+    end
+
+    if not vim.api.nvim_buf_is_valid(bufnr) then
+        return false
+    end
+
+    -- Assumed, any real file has a file name
+    local bufname = vim.api.nvim_buf_get_name(bufnr)
+    if bufname == "" then
+        return false
+    end
+
+    -- Also assumed, any file has some sort of file type
+    local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+    -- and should be listed(visible to users, us)
+    local buflisted = vim.api.nvim_get_option_value("buflisted", { buf = bufnr })
+
+    return filetype ~= "" and buflisted == true
+end
+
+local function toggle_zen_mode()
+    if not is_real_file() then
+        return
+    end
+
+    vim.cmd("ZenMode")
+end
+
 return {
     "folke/zen-mode.nvim",
     opts = {
@@ -53,6 +88,6 @@ return {
     config = function(_, opts)
         require("zen-mode").setup(opts)
 
-        vim.keymap.set("n", "\\z", ":ZenMode<cr>", { noremap = true, silent = true, desc = "Toggle zen" })
+        vim.keymap.set("n", "\\z", toggle_zen_mode, { noremap = true, silent = true, desc = "Toggle zen" })
     end,
 }

@@ -108,10 +108,11 @@ export EZA_ICON_SPACING=2
 alias ls="eza"
 alias l="eza -1h --icons"
 alias ll="eza -1"
+alias li="eza --icons"
 alias lll="ll -lh --icons"
 alias l2="ll"
 alias l3="lll"
-alias bat="bat --paging=always --style=full"
+alias bat="bat --paging=always --style=full --color=always"
 alias escape="sed 's/\x1b\[[0-9;]*m//g'"
 alias aider="aider --env-file $HOME/.aider.env --sonnet"
 alias wcl="wezterm cli"
@@ -158,6 +159,10 @@ alias cdtmp='cd "$(cat $TMPFILE)" || return 1'
 alias cdtemp="cdtmp"
 alias echotmp='cat "$TMPFILE" || return 1'
 alias echotemp="echotmp"
+alias tm=tmux
+alias tmx=tmux
+alias tma=tmux attach
+alias tldr="tldr --color=always"
 
 # Terminal Padding Keybindings
 remove_terminal_padding(){

@@ -10,7 +10,6 @@ local disabled_plugins = {
         branch = "harpoon2",
     },
     "akinsho/bufferline.nvim",
-    "folke/noice.nvim",
 }
 
 M = vim.tbl_map(function(plugin)
