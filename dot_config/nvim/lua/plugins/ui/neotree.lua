@@ -2,6 +2,7 @@ return {
     "nvim-neo-tree/neo-tree.nvim",
     opts = {
         window = {
+            position = "float",
             width = 32,
             mappings = {
                 ["l"] = function(state)
@@ -18,8 +19,7 @@ return {
                     -- move cur 1 line down
                     if node.type == "directory" then
                         local children = vim.fn.readdir(node.path)
-                        local has_children = #children > 0
-                        if has_children then
+                        if #children > 0 then
                             local cur = vim.api.nvim_win_get_cursor(0)
                             local row, col = unpack(cur)
                             vim.api.nvim_win_set_cursor(0, { row + 1, col })
