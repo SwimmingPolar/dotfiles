@@ -3,9 +3,6 @@ return {
     -- disable damm annoying lsp signature help documentation window
     -- which looks like coming from nvim-cmp when it is actually noice.lua
     -- that opens up the window automatically.
-    dependencies = {
-        "hrsh7th/nvim-cmp",
-    },
     opts = {
         presets = {
             lsp_doc_border = {

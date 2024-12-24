@@ -1,8 +1,10 @@
 -- General
-vim.opt.number = true -- Show line numbers
+vim.opt.number = false -- Show line numbers
+vim.opt.relativenumber = false -- Relative line numbers
+vim.opt.signcolumn = "no" -- No sign column
 vim.opt.wrap = false -- No line wrap
 vim.opt.showbreak = "+++" -- Wrap-broken line prefix
-vim.opt.textwidth = 100 -- Line wrap (number of cols)
+vim.opt.textwidth = 100 -- Line wrap ()
 vim.opt.showmatch = true -- Highlight matching brace
 vim.opt.visualbell = true -- Use visual bell (no beeping)
 vim.opt.hlsearch = true -- Highlight all search results
@@ -20,8 +22,8 @@ vim.opt.tabstop = 4 -- Number of spaces per Tab
 vim.opt.undolevels = 1000 -- Number of undo levels
 vim.opt.swapfile = false -- No swap files
 vim.opt.virtualedit = "block" -- Virtual block mode
-vim.opt.list = false
-vim.opt.cursorline = true
+vim.opt.list = false -- Show invisible characters
+vim.opt.cursorline = true -- Enable highlighting of the current line
 
 vim.diagnostic.config({
     float = {
@@ -32,3 +34,5 @@ vim.diagnostic.config({
 vim.cmd([[let g:loaded_node_provider = 0]])
 vim.cmd([[let g:loaded_perl_provider = 0]])
 vim.cmd([[let g:loaded_ruby_provider = 0]])
+
+vim.g.snacks_animate = false

@@ -1,4 +1,3 @@
----@diagnostic disable: missing-fields
 require("config.ui")
 
 local WIDE_HEIGHT = 40
