@@ -5,39 +5,7 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "fn + left_shirt + left_alt + j to Page Down",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": {
-                                        "mandatory": ["fn", "left_shift", "left_alt"],
-                                        "optional": []
-                                    }
-                                },
-                                "to": [{ "key_code": "page_down" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "fn + left_shift + left_alt + k to Page Up",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": {
-                                        "mandatory": ["fn", "left_shift", "left_alt"],
-                                        "optional": []
-                                    }
-                                },
-                                "to": [{ "key_code": "page_up" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "fn + left_shift + j to scroll-down",
+                        "description": "fn + left_shift + j / scroll-down",
                         "manipulators": [
                             {
                                 "from": {
@@ -53,7 +21,7 @@
                         ]
                     },
                     {
-                        "description": "fn + left_shift + k to scroll-up",
+                        "description": "fn + left_shift + k / scroll-up",
                         "manipulators": [
                             {
                                 "from": {
@@ -101,7 +69,7 @@
                         ]
                     },
                     {
-                        "description": "fn + d to Delete ot Backspace",
+                        "description": "FN + D to Delete ot Backspace",
                         "manipulators": [
                             {
                                 "from": {
@@ -117,7 +85,7 @@
                         ]
                     },
                     {
-                        "description": "fn + b to Delete ot Backspace",
+                        "description": "FN + B to Delete ot Backspace",
                         "manipulators": [
                             {
                                 "from": {
@@ -133,7 +101,7 @@
                         ]
                     },
                     {
-                        "description": "fn + h to Left Arrow",
+                        "description": "FN + H to Left Arrow",
                         "manipulators": [
                             {
                                 "from": {
@@ -149,7 +117,7 @@
                         ]
                     },
                     {
-                        "description": "fn + j to Down Arrow",
+                        "description": "FN + J to Down Arrow",
                         "manipulators": [
                             {
                                 "from": {
@@ -165,7 +133,7 @@
                         ]
                     },
                     {
-                        "description": "fn + k to Up Arrow",
+                        "description": "FN + K to Up Arrow",
                         "manipulators": [
                             {
                                 "from": {
@@ -181,7 +149,7 @@
                         ]
                     },
                     {
-                        "description": "fn + l to Right Arrow",
+                        "description": "FN + L to Right Arrow",
                         "manipulators": [
                             {
                                 "from": {
@@ -199,8 +167,7 @@
                 ]
             },
             "name": "Default profile",
-            "selected": true,
-            "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
+            "selected": true
         }
     ]
 }
