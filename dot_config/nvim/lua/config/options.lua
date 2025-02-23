@@ -1,6 +1,6 @@
 -- General
-vim.opt.number = false -- Show line numbers
-vim.opt.relativenumber = false -- Relative line numbers
+-- vim.opt.number = false -- Show line numbers
+-- vim.opt.relativenumber = false -- Relative line numbers
 vim.opt.signcolumn = "no" -- No sign column
 vim.opt.wrap = false -- No line wrap
 vim.opt.showbreak = "+++" -- Wrap-broken line prefix
@@ -14,11 +14,11 @@ vim.opt.incsearch = true -- Searches for strings incrementally
 vim.opt.autoindent = true -- Auto-indent new lines
 vim.opt.cindent = true -- Use 'C' style program indenting
 vim.opt.expandtab = true -- Use spaces instead of tabs
-vim.opt.shiftwidth = 4 -- Number of auto-indent spaces
+vim.opt.shiftwidth = 2 -- Number of auto-indent spaces
 vim.opt.smartindent = true -- Enable smart-indent
 vim.opt.smarttab = true -- Enable smart-tabs
-vim.opt.softtabstop = 4 -- Number of spaces per Tab
-vim.opt.tabstop = 4 -- Number of spaces per Tab
+vim.opt.softtabstop = 2 -- Number of spaces per Tab
+vim.opt.tabstop = 2 -- Number of spaces per Tab
 vim.opt.undolevels = 1000 -- Number of undo levels
 vim.opt.swapfile = false -- No swap files
 vim.opt.virtualedit = "block" -- Virtual block mode
