@@ -1,3 +1,6 @@
+export LANG="en_US.UTF-8"
+export LC_CTYPE="en_US.UTF-8"
+
 # If you come from bash you might have to change your $PATH.
 export PATH="$HOME/go:$HOME/go/bin:$HOME/.zsh/scripts:/usr/local/go/bin:$HOME/.local/bin:$HOME/bin:/usr/local/bin:$HOME/.cargo/bin:$PATH"
 
@@ -136,7 +139,7 @@ alias top="bpytop"
 alias clip="pbcopy"
 # AI assistant
 alias cli='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; f'
-alias how='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "With Short answer: how $@" | tee >(pbcopy) }; f'
+alias how='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "With Short answer: how $@" | tee >(tr -d "\n" | pbcopy); }; f'
 alias explain="aichat -m openrouter:anthropic/claude-3.5-sonnet -r %explain-shell%"
 alias what='aichat -m openrouter:anthropic/claude-3.5-sonnet "With short answer: what $@"'
 alias ask="what"
@@ -163,6 +166,8 @@ alias tm=tmux
 alias tmx=tmux
 alias tma=tmux attach
 alias tldr="tldr --color=always"
+alias py="python3"
+alias pip="python3 -m pip"
 
 # Terminal Padding Keybindings
 remove_terminal_padding(){
