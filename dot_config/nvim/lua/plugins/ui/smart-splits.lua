@@ -3,7 +3,7 @@
 return {
   "mrjones2014/smart-splits.nvim",
   config = function(_, opts)
-    require("smart-splits").setup({
+    require("smart-splits").setup {
       opts,
       -- Ignored buffer types (only while resizing)
       ignored_buftypes = {
@@ -97,7 +97,7 @@ return {
       kitty_password = nil,
       -- default logging level, one of: 'trace'|'debug'|'info'|'warn'|'error'|'fatal'
       log_level = "info",
-    })
+    }
 
     -- recommended mappings
     -- resizing splits

@@ -1,8 +1,8 @@
 return {
-    "folke/snacks.nvim",
-    opts = {
-        indent = {
-            enabled = false,
-        },
+  "folke/snacks.nvim",
+  opts = {
+    indent = {
+      enabled = false,
     },
+  },
 }

@@ -1,7 +1,7 @@
-require("config.ui")
+require "config.ui"
 
 -- Easy scape from vim
-vim.cmd([[
+vim.cmd [[
 fun! SetupCommandAlias(from, to)
 	exec 'cnoreabbrev <expr> '.a:from
 		\ .' ((getcmdtype() is# ":" && getcmdline() is# "'.a:from.'")'
@@ -10,12 +10,12 @@ endfun
 call SetupCommandAlias("Wq","wq")
 call SetupCommandAlias("wQ","wq")
 call SetupCommandAlias("WQ","wq")
-]])
+]]
 
-local Snacks = require("snacks")
+local Snacks = require "snacks"
 -- Remap C-x to close buffer
 vim.keymap.set("", "<C-x>", function()
-    Snacks.bufdelete()
+  Snacks.bufdelete()
 end, { desc = "Close the current buffer" })
 
 -- Move current line
@@ -24,11 +24,11 @@ vim.keymap.set("n", "<A-k>", ":m .-2<CR>==", { noremap = true, silent = true })
 vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
 vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
 
-local Util = require("lazyvim.util")
+local Util = require "lazyvim.util"
 vim.keymap.set("n", "<C-/>", function()
-    Util.terminal(nil, {
-        border = "solid",
-    })
+  Util.terminal(nil, {
+    border = "solid",
+  })
 end, { desc = "Term with border" })
 
 -- Remap H(High) M(Middle) L(Low)

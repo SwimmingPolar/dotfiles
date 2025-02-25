@@ -1,3 +1,3 @@
 return {
-    -- dir = "~/Projects/custom-copilot.nvim",
+  -- dir = "~/Projects/custom-copilot.nvim",
 }
