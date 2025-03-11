@@ -1,6 +1,8 @@
 #!/bin/bash
 
 list=(
+  .config/color.palette
+  .config/karabiner
   .config/bat
   .config/lf
   .config/nvim
