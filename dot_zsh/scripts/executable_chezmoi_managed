@@ -5,7 +5,7 @@
 # list of DIRECTORIES that are managed by chezmoi_managed
 # but should not be expanded to tree
 do_not_expand=(
-  example_dir
+  nvim
 )
 
 # Convert do_not_expand to regex

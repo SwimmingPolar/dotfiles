@@ -1,18 +1,17 @@
 #!/bin/bash
 
 list=(
-    .config/bat
-    .config/lf
-    .config/nvim
-    .config/wezterm
-    .zsh
-    .zshrc
-    .zshenv
-    .tmux.conf
-    .tmux
+  .config/bat
+  .config/lf
+  .config/nvim
+  .config/wezterm
+  .zsh
+  .zshrc
+  .zshenv
+  .tmux.conf
+  .tmux
 )
 
 for item in "${list[@]}"; do
-    chezmoi forget "$HOME/$item"
-    chezmoi add "$HOME/$item"
+  chezmoi re-add "$HOME/$item"
 done
