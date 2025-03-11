@@ -84,16 +84,10 @@ return {
       }
       opts.sources = {
         {
-          name = "codeium",
-          max_item_count = 1,
-          entry_filter = function(entry, ctx)
-            return not entry.exact
-          end,
-        },
-        { name = "luasnip", max_item_count = 5 },
-        {
           name = "nvim_lsp",
+          priority = 1,
           max_item_count = 30,
+          group_index = 0,
           entry_filter = function(entry, ctx)
             local open_paren = ctx.cursor_before_line:sub(-1)
             local close_paren = ctx.cursor_after_line
@@ -107,10 +101,20 @@ return {
             end,
           },
         },
-        { name = "emmet_vim", max_item_count = 1 },
-        { name = "path", max_item_count = 3 },
-        { name = "cmp-cmdline", max_item_count = 3 },
-        { name = "nvim_lua" },
+        {
+          name = "copilot",
+          max_item_count = 3,
+          keyword_length = 2,
+          group_index = 0,
+          entry_filter = function(entry, ctx)
+            return not entry.exact
+          end,
+        },
+        { name = "luasnip", max_item_count = 5, priority = 2, group_index = 0 },
+        { name = "emmet_vim", max_item_count = 3, group_index = 1, keyword_length = 2, trigger_characters = { "?" } },
+        { name = "path", max_item_count = 3, group_index = 2 },
+        { name = "cmp-cmdline", max_item_count = 3, group_index = 2 },
+        { name = "nvim_lua", group_index = 1 },
       }
       opts.matching = {
         disallow_fuzzy_matching = false,
@@ -127,11 +131,16 @@ return {
       }
       local extended_mapping = vim.tbl_extend("force", opts.mapping, {
         ["<Tab>"] = cmp.mapping(function(fallback)
-          if cmp.get_selected_entry() then
+          local selected_entry = cmp.get_selected_entry()
+          local first_entry = cmp.get_entries()[1]
+
+          if selected_entry then
             cmp.confirm { select = true }
           elseif luasnip.locally_jumpable(1) then
             luasnip.jump(1)
           elseif cmp.visible() and has_words_before() then
+            cmp.confirm { select = true }
+          elseif not selected_entry and first_entry and first_entry.source.name == "copilot" then
             cmp.confirm { select = true }
           else
             fallback()

@@ -1,3 +1,5 @@
+require("luasnip.loaders.from_lua").load { paths = { vim.fn.stdpath "config" .. "/lua/snippets" } }
+
 return {
   "L3MON4D3/LuaSnip",
   dependencies = {
@@ -7,6 +9,7 @@ return {
         require("luasnip.loaders.from_vscode").lazy_load()
         local ls = require "luasnip"
         ls.filetype_set("typescriptreact", { "javascript" })
+        ls.filetype_set("typescript", { "javascript" })
       end,
     },
     {
@@ -26,4 +29,5 @@ return {
       end,
     },
   },
+  config = function() end,
 }

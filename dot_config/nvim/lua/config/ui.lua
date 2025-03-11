@@ -8,6 +8,7 @@ vim.g.source_mapping = {
   path = "[Path]",
   spell = "[Spell]",
   emoji = "[Emoji]",
+  ["emmet_vim"] = "[Emmet]",
 }
 vim.g.icons = {
   Namespace = "󰌗 ",

@@ -31,14 +31,16 @@ return {
     buffers = {
       bind_to_cwd = false,
       follow_current_file = {
-        enabled = true, -- This will find and focus the file in the active buffer every time
-        leave_dirs_open = true, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
+        enabled = true,
       },
     },
     popup_border_style = "single",
     hide_root_node = true,
     filesystem = {
       bind_to_cwd = false,
+      follow_current_file = {
+        enabled = true,
+      },
       components = {
         -- add padding to the right of each file names
         name = function(config, node, state)

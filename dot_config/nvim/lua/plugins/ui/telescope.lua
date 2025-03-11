@@ -21,36 +21,13 @@
 return {
   "nvim-telescope/telescope.nvim",
   opts = {
-    pickers = {
-      buffers = {
-        previewer = false,
-        mode = "normal",
-        theme = "dropdown",
-        initial_mode = "normal",
-      },
-    },
-    extensions = {
-      import = {
-        initial_mode = "normal",
-        theme = "dropdown",
-        results_title = false,
-        sorting_strategy = "ascending",
-        layout_strategy = "center",
-        layout_config = {
-          preview_cutoff = 1, -- Preview should always show (unless previewer = false)
-          width = function(_, max_columns, _)
-            return math.min(max_columns, 80)
-          end,
-          height = function(_, _, max_lines)
-            return math.min(max_lines, 15)
-          end,
+    defaults = {
+      mappings = {
+        i = {
+          ["<M-p>"] = require("telescope.actions.layout").toggle_preview,
         },
-        border = true,
-        borderchars = {
-          { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
-          prompt = { "─", "│", " ", "│", "┌", "┐", "│", "│" },
-          results = { "─", "│", "─", "│", "├", "┤", "┘", "└" },
-          preview = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+        n = {
+          ["<M-p>"] = require("telescope.actions.layout").toggle_preview,
         },
       },
     },
