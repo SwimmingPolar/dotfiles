@@ -6,9 +6,9 @@ vim.cmd "autocmd BufEnter * setlocal formatoptions-=cro"
 
 -- set named registers with macros
 vim.cmd [[
-let @D = "gg/default.*[A-Z]\w*\>\r"
-let @e = "gg/export const\rggn^[nm1"
-let @R = "$/return\rzzm0"
+let @d = "gg/default.*[A-Z]\w*\>\r"
+let @f = "/\\(\\(^export=\\?\\s\\+\\(const\\|function\\|default\\)\\s\\+.*(=\\?.*)=\\?\\s\\+=(\\=>)\\?\\s\\+{$\\)\\|\\(^const\\s\\+.*(=\\?.*)=\\?.*=>\\s\\+{$\\)\\)\r"
+let @r = "0/return\rzzm0"
 ]]
 
 -- set line numbers on help
