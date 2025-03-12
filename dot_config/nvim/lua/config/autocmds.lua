@@ -5,12 +5,11 @@ vim.cmd "autocmd BufEnter * set formatoptions-=cro"
 vim.cmd "autocmd BufEnter * setlocal formatoptions-=cro"
 
 -- set named registers with macros
--- vim.cmd([[
--- let @C = "/export const.*= \rztf(\e%j0ztm1M"
--- let @c = "/const.*= \rztf(\e%j0ztm1M"
--- let @R = "?return\rzzm0"
--- let @E = "\e/useeffect\rztV%"
--- ]])
+vim.cmd [[
+let @D = "gg/default.*[A-Z]\w*\>\r"
+let @e = "gg/export const\rggn^[nm1"
+let @R = "$/return\rzzm0"
+]]
 
 -- set line numbers on help
 vim.cmd "autocmd FileType help setlocal number"

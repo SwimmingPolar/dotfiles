@@ -233,3 +233,6 @@ eval "$(pyenv init -)"
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/swimmingpolar/.cache/lm-studio/bin"
+
+
+bindkey '^[l' clear-screen && bindkey -r '^L'
