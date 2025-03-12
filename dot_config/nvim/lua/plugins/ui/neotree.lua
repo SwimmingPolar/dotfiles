@@ -30,17 +30,17 @@ return {
     },
     buffers = {
       bind_to_cwd = false,
-      -- follow_current_file = {
-      --   enable = true,
-      -- },
+      follow_current_file = {
+        enable = true,
+      },
     },
     popup_border_style = "single",
     hide_root_node = true,
     filesystem = {
       bind_to_cwd = false,
-      -- follow_current_file = {
-      --   enable = true,
-      -- },
+      follow_current_file = {
+        enable = true,
+      },
       components = {
         -- add padding to the right of each file names
         name = function(config, node, state)
