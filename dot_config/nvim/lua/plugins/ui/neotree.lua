@@ -2,7 +2,7 @@ return {
   "nvim-neo-tree/neo-tree.nvim",
   opts = {
     window = {
-      position = "float",
+      -- position = "float",
       width = 32,
       mappings = {
         ["l"] = function(state)
@@ -30,34 +30,34 @@ return {
     },
     buffers = {
       bind_to_cwd = false,
-      follow_current_file = {
-        enabled = true,
-      },
+      -- follow_current_file = {
+      --   enable = true,
+      -- },
     },
     popup_border_style = "single",
     hide_root_node = true,
     filesystem = {
       bind_to_cwd = false,
-      follow_current_file = {
-        enabled = true,
-      },
+      -- follow_current_file = {
+      --   enable = true,
+      -- },
       components = {
         -- add padding to the right of each file names
         name = function(config, node, state)
           local name = require("neo-tree.sources.common.components").name(config, node, state)
-          name.text = " " .. name.text
+          if name and name.text then
+            name.text = " " .. name.text
+          end
           return name
         end,
       },
     },
     sources = {
       "filesystem",
-      -- "document_symbols",
     },
     source_selector = {
       sources = {
         { source = "filesystem" },
-        -- { source = "document_symbols" },
       },
       winbar = true,
       content_layout = "center",
