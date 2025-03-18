@@ -8,8 +8,10 @@ return {
       config = function()
         require("luasnip.loaders.from_vscode").lazy_load()
         local ls = require "luasnip"
+
         ls.filetype_set("typescriptreact", { "javascript" })
         ls.filetype_set("typescript", { "javascript" })
+        ls.filetype_set("astro", { "typescript" })
       end,
     },
     {

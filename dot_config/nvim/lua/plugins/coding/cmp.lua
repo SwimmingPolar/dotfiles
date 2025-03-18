@@ -104,7 +104,7 @@ return {
         {
           name = "copilot",
           max_item_count = 3,
-          keyword_length = 2,
+          keyword_length = 1,
           group_index = 0,
           entry_filter = function(entry, ctx)
             return not entry.exact

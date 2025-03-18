@@ -6,6 +6,10 @@ return {
       width = 32,
       mappings = {
         ["l"] = function(state)
+          if not state then
+            return
+          end
+
           local node = state.tree:get_node()
 
           -- before updated, check if expanded or not
@@ -44,6 +48,10 @@ return {
       components = {
         -- add padding to the right of each file names
         name = function(config, node, state)
+          if not config or not node or not state then
+            return
+          end
+
           local name = require("neo-tree.sources.common.components").name(config, node, state)
           if name and name.text then
             name.text = " " .. name.text

@@ -1,4 +1,4 @@
-local M = {}
+require("lspconfig.ui.windows").default_options.border = "single"
 require("lspconfig").lua_ls.setup {
   settings = {
     Lua = {
@@ -8,4 +8,5 @@ require("lspconfig").lua_ls.setup {
     },
   },
 }
-return M
+
+return {}
