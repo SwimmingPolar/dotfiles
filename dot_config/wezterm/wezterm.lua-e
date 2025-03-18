@@ -37,7 +37,7 @@ config.line_height = 1.175
 config.front_end = "OpenGL"
 config.freetype_load_target = "Light"
 config.freetype_render_target = "HorizontalLcd"
-config.cell_width = 0.9
+config.cell_width = 0.88
 
 -- Experimental font size and line height
 -- config.font_size = 11.5

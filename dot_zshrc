@@ -144,8 +144,8 @@ alias explain="aichat -m openrouter:anthropic/claude-3.5-sonnet -r %explain-shel
 alias what='aichat -m openrouter:anthropic/claude-3.5-sonnet "With short answer: what $@"'
 alias ask="what"
 alias codeai='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r codas -c "$@" | tee >(pbcopy) | glow }; f'
-alias generate="code"
-alias gen="code"
+alias generate="codeai"
+alias gen="codeai"
 alias ai="aichat -m openrouter:anthropic/claude-3.5-sonnet"
 alias sonnet="aichat -m openrouter:anthropic/claude-3.5-sonnet"
 alias sdf="git diff | git-split-diffs --color | less -RFX"
@@ -233,6 +233,5 @@ eval "$(pyenv init -)"
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/swimmingpolar/.cache/lm-studio/bin"
-
 
 bindkey '^[l' clear-screen && bindkey -r '^L'
