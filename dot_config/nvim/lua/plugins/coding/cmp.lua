@@ -140,6 +140,8 @@ return {
             luasnip.jump(1)
           elseif cmp.visible() and has_words_before() then
             cmp.confirm { select = true }
+          -- elseif cmp.visible() then
+          --   cmp.confirm { select = true }
           elseif not selected_entry and first_entry and first_entry.source.name == "copilot" then
             cmp.confirm { select = true }
           else

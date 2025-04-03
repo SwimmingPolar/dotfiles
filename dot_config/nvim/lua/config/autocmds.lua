@@ -15,15 +15,15 @@ let @r = "0/return\rzzm0"
 vim.cmd "autocmd FileType help setlocal number"
 
 -- tailwind sort on save
-vim.api.nvim_create_autocmd("BufWritePost", {
-  group = vim.api.nvim_create_augroup("tailwind sort on save", { clear = true }),
-  pattern = "*",
-  callback = function()
-    local lsp_clients = vim.lsp.get_clients()
-    for _, lsp in ipairs(lsp_clients) do
-      if lsp.name == "tailwindcss" then
-        vim.cmd "TailwindSortSync"
-      end
-    end
-  end,
-})
+-- vim.api.nvim_create_autocmd("BufWritePost", {
+--   group = vim.api.nvim_create_augroup("tailwind sort on save", { clear = true }),
+--   pattern = "*",
+--   callback = function()
+--     local lsp_clients = vim.lsp.get_clients()
+--     for _, lsp in ipairs(lsp_clients) do
+--       if lsp.name == "tailwindcss" then
+--         vim.cmd "TailwindSortSync"
+--       end
+--     end
+--   end,
+-- })

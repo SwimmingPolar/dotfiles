@@ -138,16 +138,21 @@ alias lg="lazygit"
 alias top="bpytop"
 alias clip="pbcopy"
 # AI assistant
-alias cli='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "$@" | tee >(pbcopy) }; f'
-alias how='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r %shell% "With Short answer: how $@" | tee >(tr -d "\n" | pbcopy); }; f'
-alias explain="aichat -m openrouter:anthropic/claude-3.5-sonnet -r %explain-shell%"
-alias what='aichat -m openrouter:anthropic/claude-3.5-sonnet "With short answer: what $@"'
+copy_and_glow() {
+  tee >(tr -d "\n" | pbcopy) | glow
+}
+aichat_with_model() {
+  aichat -m openrouter:anthropic/claude-3.7-sonnet "$@" | copy_and_glow
+}
+alias cli="aichat_with_model -r %shell%"
+alias explain="aichat_with_model -r %explain-shell%"
+alias how="aichat_with_model -r %shell% Short Answer: how "
+alias what="aichat_with_model Short Answer: what "
 alias ask="what"
-alias codeai='f(){ aichat -m openrouter:anthropic/claude-3.5-sonnet -r codas -c "$@" | tee >(pbcopy) | glow }; f'
+alias codeai="aichat_with_model -r codas -c"
 alias generate="codeai"
 alias gen="codeai"
-alias ai="aichat -m openrouter:anthropic/claude-3.5-sonnet"
-alias sonnet="aichat -m openrouter:anthropic/claude-3.5-sonnet"
+alias ai="aichat_with_model"
 alias sdf="git diff | git-split-diffs --color | less -RFX"
 alias gdf="git diff | git-split-diffs --color | less -RFX"
 # about creating tempoarary file and directory
