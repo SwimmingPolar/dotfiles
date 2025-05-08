@@ -144,11 +144,10 @@ copy_and_glow() {
 aichat_with_model() {
   aichat -m openrouter:anthropic/claude-3.7-sonnet "$@" | copy_and_glow
 }
-alias cli="aichat_with_model -r %shell%"
-alias explain="aichat_with_model -r %explain-shell%"
-alias how="aichat_with_model -r %shell% Short Answer: how "
 alias what="aichat_with_model Short Answer: what "
-alias ask="what"
+alias how="aichat_with_model -r %shell% Short Answer: how "
+alias explain="aichat_with_model -r %explain-shell%"
+alias cli="aichat_with_model -r %shell%"
 alias codeai="aichat_with_model -r codas -c"
 alias generate="codeai"
 alias gen="codeai"
