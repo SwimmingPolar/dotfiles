@@ -142,11 +142,17 @@ copy_and_glow() {
   tee >(tr -d "\n" | pbcopy) | glow
 }
 aichat_with_model() {
-  aichat -m openrouter:anthropic/claude-3.7-sonnet "$@" | copy_and_glow
+  if [[ "$1" == "--no-copy" ]]; then
+    shift
+    aichat -m openrouter:anthropic/claude-sonnet-4 "$@" | glow
+  else
+    aichat -m openrouter:anthropic/claude-sonnet-4 "$@" | copy_and_glow
+  fi
 }
-alias what="aichat_with_model Short Answer: what "
+alias what="aichat_with_model --no-copy Short Answer: what "
 alias how="aichat_with_model -r %shell% Short Answer: how "
-alias explain="aichat_with_model -r %explain-shell%"
+alias explain="aichat_with_model --no-copy -r %explain-shell%"
+alias ask="aichat_with_model --no-copy User: "
 alias cli="aichat_with_model -r %shell%"
 alias codeai="aichat_with_model -r codas -c"
 alias generate="codeai"
