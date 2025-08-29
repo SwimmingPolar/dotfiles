@@ -86,7 +86,7 @@ return {
         {
           name = "nvim_lsp",
           priority = 1,
-          max_item_count = 30,
+          max_item_count = 45,
           group_index = 0,
           entry_filter = function(entry, ctx)
             local open_paren = ctx.cursor_before_line:sub(-1)
