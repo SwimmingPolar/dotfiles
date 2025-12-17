@@ -12,7 +12,7 @@ return {
 
           local node = state.tree:get_node()
 
-          -- before updated, check if expanded or not
+          -- before update, check if expanded or not
           local is_expanded = node:is_expanded()
           if not is_expanded then
             local M = state.commands
@@ -26,6 +26,13 @@ return {
             if #children > 0 then
               local cur = vim.api.nvim_win_get_cursor(0)
               local row, col = unpack(cur)
+
+              local line = vim.api.nvim_buf_line_count(0)
+
+              if line < row + 1 then
+                return
+              end
+
               vim.api.nvim_win_set_cursor(0, { row + 1, col })
             end
           end

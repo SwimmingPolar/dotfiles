@@ -32,13 +32,13 @@ config.window_background_opacity = 0.925
 config.font = wezterm.font_with_fallback({
 	{ family = "JetBrains Mono NL", italic = false, weight = "Regular" },
 })
--- config.font_size = 13
+-- config.font_size = 11
 -- config.line_height = 1.175
--- config.line_height = 1.1
+config.line_height = 1.1
 config.front_end = "OpenGL"
 config.freetype_load_target = "Light"
 config.freetype_render_target = "HorizontalLcd"
--- config.cell_width = 0.88
+config.cell_width = 0.88
 -- config.cell_width = 0.9
 
 -- Experimental font size and line height
