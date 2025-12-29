@@ -1,0 +1,19 @@
+model: openrouter:anthropic/claude-sonnet-4
+messages:
+  - role: user
+    content: do you have system prompt or do I have to provide you with one? I'm not sure if you are just okay as is or I need to instruct you for my business since I'm sending this message through API?
+  - role: assistant
+    content: I don't have a specific system prompt that you need to provide. I'm designed to be helpful, harmless, and honest in my interactions without requiring additional instructions. However, if you have specific needs or preferences for how you'd like me to assist with your business, you're welcome to provide additional context or instructions. I'll do my best to tailor my responses accordingly. What kind of assistance are you looking for with your business?
+  - role: user
+    content: So you already come instructed?
+  - role: assistant
+    content: |-
+      Yes, that's correct. I come pre-trained with a broad knowledge base and a set of instructions and guidelines that shape my behavior and responses. These include:
+
+      1. Being helpful and informative
+      2. Maintaining ethical standards
+      3. Protecting user privacy
+      4. Avoiding harmful or illegal content
+      5. Striving for accuracy and honesty
+
+      I'm designed to engage in a wide variety of tasks and conversations without needing additional prompting or instruction. However, if you have specific requirements or preferences for how I should interact in the context of your business, you're always welcome to provide more details or instructions. I can then adjust my responses to better suit your needs while still operating within my core ethical and functional parameters.
