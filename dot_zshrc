@@ -144,9 +144,9 @@ copy_and_glow() {
 aichat_with_model() {
   if [[ "$1" == "--no-copy" ]]; then
     shift
-    aichat -m openrouter:anthropic/claude-sonnet-4 "$@" | glow
+    aichat -m "openrouter:anthropic/claude-sonnet-4.5" "$@" | glow
   else
-    aichat -m openrouter:anthropic/claude-sonnet-4 "$@" | copy_and_glow
+    aichat -m "openrouter:anthropic/claude-sonnet-4.5" "$@" | copy_and_glow
   fi
 }
 alias what="aichat_with_model --no-copy Short Answer: what "

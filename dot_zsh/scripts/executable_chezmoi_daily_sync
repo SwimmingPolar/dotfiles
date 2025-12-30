@@ -12,6 +12,7 @@ list=(
   .zshenv
   .tmux.conf
   .tmux
+  Library/Application\ Support/aichat
 )
 
 for item in "${list[@]}"; do
