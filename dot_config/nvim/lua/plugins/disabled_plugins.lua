@@ -1,7 +1,7 @@
 local M = {}
 
 local disabled_plugins = {
-  "echasnovski/mini.pairs",
+  "nvim-mini/mini.pairs",
   "folke/persistence.nvim",
   "indent-blankline.nvim",
   "monaqa/dial.nvim",
