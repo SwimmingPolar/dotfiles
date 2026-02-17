@@ -180,6 +180,8 @@ alias py="python3"
 alias pip="python3 -m pip"
 alias el="elixir"
 alias elx="elixir"
+alias v="nvim"
+alias V="vim"
 
 # Terminal Padding Keybindings
 remove_terminal_padding(){
