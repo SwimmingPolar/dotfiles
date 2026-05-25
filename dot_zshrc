@@ -182,6 +182,7 @@ alias el="elixir"
 alias elx="elixir"
 alias v="nvim"
 alias V="vim"
+alias ct="cd /tmp"
 
 # Terminal Padding Keybindings
 remove_terminal_padding(){
