@@ -144,13 +144,13 @@ copy_and_glow() {
 aichat_with_model() {
   if [[ "$1" == "--no-copy" ]]; then
     shift
-    aichat -m "openrouter:anthropic/claude-sonnet-4.5" "$@" | glow
+    aichat -m "openrouter:anthropic/claude-opus-5" "$@" | glow
   else
-    aichat -m "openrouter:anthropic/claude-sonnet-4.5" "$@" | copy_and_glow
+    aichat -m "openrouter:anthropic/claude-opus-5" "$@" | copy_and_glow
   fi
 }
 alias what="aichat_with_model --no-copy Short Answer: what "
-alias how="aichat_with_model -r %shell% Short Answer: how "
+alias how="aichat_with_model -r %shell% Short Answer without any styling format such as markdown or quotes: how "
 alias explain="aichat_with_model --no-copy -r %explain-shell%"
 alias ask="aichat_with_model --no-copy User: "
 alias cli="aichat_with_model -r %shell%"
@@ -183,6 +183,21 @@ alias elx="elixir"
 alias v="nvim"
 alias V="vim"
 alias ct="cd /tmp"
+
+ttok() {
+    # Check if the first argument is an existing file
+    if [ -f "$1" ]; then
+        python3 -c "import tiktoken; enc = tiktoken.encoding_for_model('gpt-4o'); print(len(enc.encode(open('$1', 'r', errors='ignore').read())))"
+    # Check if data is being piped (STDIN)
+    elif [ ! -t 0 ]; then
+        python3 -c "import sys, tiktoken; enc = tiktoken.encoding_for_model('gpt-4o'); print(len(enc.encode(sys.stdin.read())))"
+    # Otherwise, treat the input as a plain text string
+    elif [ -n "$*" ]; then
+        python3 -c "import tiktoken; enc = tiktoken.encoding_for_model('gpt-4o'); print(len(enc.encode('''$*''')))"
+    else
+        echo "Usage: count-tokens [filename | 'text string'] or pipe data into it."
+    fi
+}
 
 # Terminal Padding Keybindings
 remove_terminal_padding(){
