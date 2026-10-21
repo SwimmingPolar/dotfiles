@@ -1,0 +1,6 @@
+interface:
+  display_name: "Work with Claude"
+  short_description: "Delegate a task to Claude: Title and Content in, Answer out"
+policy:
+  # Only run when the user invokes it explicitly ($work-with-claude, or @ in the ChatGPT app).
+  allow_implicit_invocation: false

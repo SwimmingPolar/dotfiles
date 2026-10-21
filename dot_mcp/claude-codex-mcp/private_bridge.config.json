@@ -1,0 +1,17 @@
+{
+  "cancelOnStop": true,
+  "useApiKeys": false,
+  "claude": {
+    "model": "opus",
+    "effort": "xhigh",
+    "blockOutsideReads": true
+  },
+  "codex": {
+    "model": "gpt-6-astra",
+    "effort": "max",
+    "bridgeServerName": "claude_bridge"
+  },
+  "claudePath": "/Users/swimmingpolar/.local/bin/claude",
+  "codexPath": "/Users/swimmingpolar/.local/bin/codex",
+  "childPath": "/opt/homebrew/Cellar/node/26.12.0/bin:/Users/swimmingpolar/.local/bin:/Users/swimmingpolar/.pyenv/shims:/Users/swimmingpolar/.local/share/zinit/polaris/bin:/Users/swimmingpolar/go:/Users/swimmingpolar/go/bin:/Users/swimmingpolar/.zsh/scripts:/usr/local/go/bin:/Users/swimmingpolar/bin:/usr/local/bin:/Users/swimmingpolar/.cargo/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/Applications/VMware Fusion.app/Contents/Public:/Users/swimmingpolar/Library/pnpm:/Users/swimmingpolar/Library/Application Support/JetBrains/Toolbox/scripts:/Users/swimmingpolar/.cache/lm-studio/bin"
+}
