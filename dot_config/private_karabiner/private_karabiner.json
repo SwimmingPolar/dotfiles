@@ -5,21 +5,119 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "Right Option → Option (Alt)",
-                        "enabled": false,
+                        "description": "(YubiKey) Block Outside Brave == All Keys",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "is_keyboard": true,
+                                                "product_id": 1031,
+                                                "vendor_id": 4176
+                                            }
+                                        ],
+                                        "type": "device_if"
+                                    },
+                                    {
+                                        "bundle_identifiers": [
+                                            "^com\\.brave\\.Browser$"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
                                 "from": {
-                                    "key_code": "right_option",
+                                    "any": "key_code",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "key_code": "left_option" }],
+                                "to": [{ "key_code": "vk_none" }],
                                 "type": "basic"
                             }
                         ]
                     },
                     {
-                        "description": "Double tap Right Option within 200ms → Caps Lock, otherwise Right Option",
+                        "description": "(YubiKey) Pass Through in Brave == All Keys",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "is_keyboard": true,
+                                                "product_id": 1031,
+                                                "vendor_id": 4176
+                                            }
+                                        ],
+                                        "type": "device_if"
+                                    },
+                                    {
+                                        "bundle_identifiers": [
+                                            "^com\\.brave\\.Browser$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "any": "key_code",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "from_event": true }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Claude Desktop) Enter == Command + Enter",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "^com\\.anthropic\\.claudefordesktop$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["caps_lock"]
+                                    }
+                                },
+                                "to": [{ "key_code": "return_or_enter" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Claude Desktop) Shift + Enter == Enter",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "^com\\.anthropic\\.claudefordesktop$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["caps_lock"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "return_or_enter",
+                                        "modifiers": ["left_shift"]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Modifier) Caps Lock == Right Option (double tap within 200 ms)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -43,7 +141,12 @@
                                     }
                                 ],
                                 "type": "basic"
-                            },
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Modifier) Right Option == Right Option (single tap)",
+                        "manipulators": [
                             {
                                 "from": {
                                     "key_code": "right_option",
@@ -82,103 +185,7 @@
                         ]
                     },
                     {
-                        "description": "right_option + ] to right-click",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "close_bracket",
-                                    "modifiers": {
-                                        "mandatory": ["right_option"],
-                                        "optional": []
-                                    }
-                                },
-                                "to": [{ "pointing_button": "button2" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "right_option + [ to left-click",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "open_bracket",
-                                    "modifiers": {
-                                        "mandatory": ["right_option"],
-                                        "optional": []
-                                    }
-                                },
-                                "to": [{ "pointing_button": "button1" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "fn + left_shift + left_option + s to down arrow",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "s",
-                                    "modifiers": {
-                                        "mandatory": ["fn", "left_shift", "left_option"],
-                                        "optional": []
-                                    }
-                                },
-                                "to": [{ "key_code": "up_arrow" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "fn + left_shift + left_option + a to down arrow",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "a",
-                                    "modifiers": {
-                                        "mandatory": ["fn", "left_shift", "left_option"],
-                                        "optional": []
-                                    }
-                                },
-                                "to": [{ "key_code": "down_arrow" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "fn + left_shift + s to right arrow",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "s",
-                                    "modifiers": {
-                                        "mandatory": ["fn", "left_shift"],
-                                        "optional": []
-                                    }
-                                },
-                                "to": [{ "key_code": "right_arrow" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "fn + left_shift + a to left arrow",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "a",
-                                    "modifiers": {
-                                        "mandatory": ["fn", "left_shift"],
-                                        "optional": []
-                                    }
-                                },
-                                "to": [{ "key_code": "left_arrow" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "fn + left_shift + e to enter",
+                        "description": "(Enter) Enter == Fn + Left Shift + E",
                         "manipulators": [
                             {
                                 "from": {
@@ -194,49 +201,7 @@
                         ]
                     },
                     {
-                        "description": "Remap Fn+Cmd+Shift+A to End, Fn+Cmd+Shift+S to Home",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "a",
-                                    "modifiers": { "mandatory": ["fn", "left_command", "left_shift"] }
-                                },
-                                "to": { "key_code": "end" },
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "s",
-                                    "modifiers": { "mandatory": ["fn", "left_command", "left_shift"] }
-                                },
-                                "to": { "key_code": "home" },
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Remap Cmd+Shift+A to Page Down, Cmd+Shift+S to Page Up",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "a",
-                                    "modifiers": { "mandatory": ["left_command", "left_shift"] }
-                                },
-                                "to": { "key_code": "page_down" },
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "s",
-                                    "modifiers": { "mandatory": ["left_command", "left_shift"] }
-                                },
-                                "to": { "key_code": "page_up" },
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Remap Cmd+Shift+Z to Cmd+[ and Cmd+Shift+X to Cmd+]",
+                        "description": "(Shortcut) Left Command + [ == Left Command + Left Shift + Z",
                         "manipulators": [
                             {
                                 "from": {
@@ -248,7 +213,12 @@
                                     "modifiers": ["left_command"]
                                 },
                                 "type": "basic"
-                            },
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Shortcut) Left Command + ] == Left Command + Left Shift + X",
+                        "manipulators": [
                             {
                                 "from": {
                                     "key_code": "x",
@@ -263,7 +233,7 @@
                         ]
                     },
                     {
-                        "description": "Remap Cmd+Shift+1 to Cmd+Shift+[ and Cmd+Shift+2 to Cmd+Shift+]",
+                        "description": "(Shortcut) Left Command + Left Shift + [ == Left Command + Left Shift + 1",
                         "manipulators": [
                             {
                                 "from": {
@@ -275,7 +245,12 @@
                                     "modifiers": ["left_command", "left_shift"]
                                 },
                                 "type": "basic"
-                            },
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Shortcut) Left Command + Left Shift + ] == Left Command + Left Shift + 2",
+                        "manipulators": [
                             {
                                 "from": {
                                     "key_code": "2",
@@ -290,7 +265,46 @@
                         ]
                     },
                     {
-                        "description": "fn + left_shift + left_alt + j to Page Down",
+                        "description": "(Navigation) End == Fn + Left Command + Left Shift + A",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "a",
+                                    "modifiers": { "mandatory": ["fn", "left_command", "left_shift"] }
+                                },
+                                "to": { "key_code": "end" },
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Navigation) Home == Fn + Left Command + Left Shift + S",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "s",
+                                    "modifiers": { "mandatory": ["fn", "left_command", "left_shift"] }
+                                },
+                                "to": { "key_code": "home" },
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Navigation) Page Down == Left Command + Left Shift + A",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "a",
+                                    "modifiers": { "mandatory": ["left_command", "left_shift"] }
+                                },
+                                "to": { "key_code": "page_down" },
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Navigation) Page Down == Fn + Left Shift + Left Option + J",
                         "manipulators": [
                             {
                                 "from": {
@@ -306,7 +320,20 @@
                         ]
                     },
                     {
-                        "description": "fn + left_shift + left_alt + k to Page Up",
+                        "description": "(Navigation) Page Up == Left Command + Left Shift + S",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "s",
+                                    "modifiers": { "mandatory": ["left_command", "left_shift"] }
+                                },
+                                "to": { "key_code": "page_up" },
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Navigation) Page Up == Fn + Left Shift + Left Option + K",
                         "manipulators": [
                             {
                                 "from": {
@@ -322,7 +349,7 @@
                         ]
                     },
                     {
-                        "description": "fn + left_shift + j to scroll-down",
+                        "description": "(Scroll) Scroll Down == Fn + Left Shift + J",
                         "manipulators": [
                             {
                                 "from": {
@@ -338,7 +365,7 @@
                         ]
                     },
                     {
-                        "description": "fn + left_shift + k to scroll-up",
+                        "description": "(Scroll) Scroll Up == Fn + Left Shift + K",
                         "manipulators": [
                             {
                                 "from": {
@@ -354,7 +381,23 @@
                         ]
                     },
                     {
-                        "description": "fn + [ to left-click",
+                        "description": "(Mouse) Left Click == Right Option + [",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "open_bracket",
+                                    "modifiers": {
+                                        "mandatory": ["right_option"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [{ "pointing_button": "button1" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Mouse) Left Click == Fn + [",
                         "manipulators": [
                             {
                                 "from": {
@@ -370,7 +413,23 @@
                         ]
                     },
                     {
-                        "description": "fn + ] to right-click",
+                        "description": "(Mouse) Right Click == Right Option + ]",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "close_bracket",
+                                    "modifiers": {
+                                        "mandatory": ["right_option"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [{ "pointing_button": "button2" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Mouse) Right Click == Fn + ]",
                         "manipulators": [
                             {
                                 "from": {
@@ -386,7 +445,7 @@
                         ]
                     },
                     {
-                        "description": "fn + d to Delete ot Backspace",
+                        "description": "(Delete) Delete (Backspace) == Fn + D",
                         "manipulators": [
                             {
                                 "from": {
@@ -402,7 +461,7 @@
                         ]
                     },
                     {
-                        "description": "fn + b to Delete ot Backspace",
+                        "description": "(Delete) Delete (Backspace) == Fn + B",
                         "manipulators": [
                             {
                                 "from": {
@@ -418,7 +477,7 @@
                         ]
                     },
                     {
-                        "description": "fn + h to Left Arrow",
+                        "description": "(Arrow) Left Arrow == Fn + H",
                         "manipulators": [
                             {
                                 "from": {
@@ -434,7 +493,7 @@
                         ]
                     },
                     {
-                        "description": "fn + j to Down Arrow",
+                        "description": "(Arrow) Down Arrow == Fn + J",
                         "manipulators": [
                             {
                                 "from": {
@@ -450,7 +509,7 @@
                         ]
                     },
                     {
-                        "description": "fn + k to Up Arrow",
+                        "description": "(Arrow) Up Arrow == Fn + K",
                         "manipulators": [
                             {
                                 "from": {
@@ -466,7 +525,7 @@
                         ]
                     },
                     {
-                        "description": "fn + l to Right Arrow",
+                        "description": "(Arrow) Right Arrow == Fn + L",
                         "manipulators": [
                             {
                                 "from": {
@@ -480,9 +539,84 @@
                                 "type": "basic"
                             }
                         ]
+                    },
+                    {
+                        "description": "(Arrow) Left Arrow == Fn + Left Shift + A",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "a",
+                                    "modifiers": {
+                                        "mandatory": ["fn", "left_shift"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [{ "key_code": "left_arrow" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Arrow) Down Arrow == Fn + Left Shift + Left Option + A",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "a",
+                                    "modifiers": {
+                                        "mandatory": ["fn", "left_shift", "left_option"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [{ "key_code": "down_arrow" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Arrow) Up Arrow == Fn + Left Shift + Left Option + S",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "s",
+                                    "modifiers": {
+                                        "mandatory": ["fn", "left_shift", "left_option"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [{ "key_code": "up_arrow" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "(Arrow) Right Arrow == Fn + Left Shift + S",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "s",
+                                    "modifiers": {
+                                        "mandatory": ["fn", "left_shift"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [{ "key_code": "right_arrow" }],
+                                "type": "basic"
+                            }
+                        ]
                     }
                 ]
             },
+            "devices": [
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "product_id": 1031,
+                        "vendor_id": 4176
+                    },
+                    "ignore": false,
+                    "manipulate_caps_lock_led": false
+                }
+            ],
             "name": "Default profile",
             "selected": true,
             "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
