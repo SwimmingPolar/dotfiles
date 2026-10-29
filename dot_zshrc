@@ -108,7 +108,7 @@ export MANPAGER="sh -c 'col -bx | bat  --wrap never -l man --style=full'"
 alias nv="nvim"
 alias nvi="nvim"
 export EZA_ICON_SPACING=2
-alias ls="eza"
+alias ls="eza "
 alias l="eza -1h --icons"
 alias ll="eza -1"
 alias li="eza --icons"
@@ -183,6 +183,8 @@ alias elx="elixir"
 alias v="nvim"
 alias V="vim"
 alias ct="cd /tmp"
+alias ovpn=openvpn
+alias man="man "
 
 ttok() {
     # Check if the first argument is an existing file
@@ -265,3 +267,8 @@ eval "$(pyenv init -)"
 export PATH="$PATH:/Users/swimmingpolar/.cache/lm-studio/bin"
 
 bindkey '^[l' clear-screen && bindkey -r '^L'
+
+# Claude Code: use my claude.ai subscription by default
+claude() { env -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN claude "$@"; }
+# Use the API key on purpose with: claude-api
+claude-api() { command claude "$@"; }
