@@ -272,3 +272,11 @@ bindkey '^[l' clear-screen && bindkey -r '^L'
 claude() { env -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN claude "$@"; }
 # Use the API key on purpose with: claude-api
 claude-api() { command claude "$@"; }
+
+codex() {
+  if (( $# == 0 )); then
+    command codex resume --last
+  else
+    command codex "$@"
+  fi
+}
