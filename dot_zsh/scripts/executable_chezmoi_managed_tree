@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# .chezmoiignore is already respected by `chezmoi managed`
+
+# Directories managed by chezmoi that should be shown,
+# but not expanded in the tree
+do_not_expand=(
+  nvim
+)
+
+managed="$(chezmoi managed)"
+
+# Drop everything *under* each do_not_expand dir, keeping the dir itself
+if ((${#do_not_expand[@]})); then
+  pattern="$(
+    IFS='|'
+    echo "${do_not_expand[*]}"
+  )"
+  managed="$(grep -Ev "(^|/)(${pattern})/" <<<"$managed" || true)"
+fi
+
+# Render as a tree;
+tree_out="$(tree -a --fromfile --noreport <<<"$managed" | tail -n +2)"
+
+echo "Chezmoi managed directories without expansion: ${do_not_expand[*]}"
+echo "Chezmoi managed files:"
+echo "$tree_out"

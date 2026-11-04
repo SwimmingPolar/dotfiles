@@ -1,20 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-list=(
-  .config/color.palette
-  .config/karabiner
-  .config/bat
-  .config/lf
-  .config/nvim
-  .config/wezterm
-  .zsh
-  .zshrc
-  .zshenv
-  .tmux.conf
-  .tmux
-  Library/Application\ Support/aichat
+# Forgets files deleted locally, picks up new files in the dirs below, then
+# updates modified managed files (re-add keeps encrypted files encrypted).
+# Public repo, plain only: no credentials in these. ~/.env is deliberately left
+# out; add new keys there with `chezmoi add --encrypt`.
+plain=(
+  "$HOME/.config/bat"
+  "$HOME/.config/color.palette"
+  "$HOME/.config/karabiner"
+  "$HOME/.config/lf"
+  "$HOME/.config/nvim"
+  "$HOME/.config/wezterm"
+  "$HOME/.mcp"
+  "$HOME/.zsh"
 )
 
-for item in "${list[@]}"; do
-  chezmoi re-add "$HOME/$item"
-done
+# DA = deleted locally. Children sort first so a dir is forgotten after its files.
+chezmoi status | sed -n 's/^DA //p' | sort -r |
+  while IFS= read -r path; do
+    echo "forget: $path"
+    chezmoi forget --force "$HOME/$path" </dev/null
+  done
+
+chezmoi add --secrets=error "${plain[@]}"
+chezmoi re-add
