@@ -61,6 +61,19 @@ config.keys = {
 			win:set_config_overrides(overrides)
 		end),
 	},
+	{
+		mods = "CMD|SHIFT",
+		key = "p",
+		action = wezterm.action_callback(function(win, pane)
+			local overrides = win:get_config_overrides() or {}
+			if overrides.window_padding then
+				overrides.window_padding = nil
+			else
+				overrides.window_padding = { left = "0.5cell", right = "0.5cell", top = "0.2cell", bottom = "0.2cell" }
+			end
+			win:set_config_overrides(overrides)
+		end),
+	},
 }
 
 return config
