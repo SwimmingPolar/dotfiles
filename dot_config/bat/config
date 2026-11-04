@@ -5,4 +5,7 @@
 # Specify desired highlighting theme (e.g. "TwoDark"). Run `bat --list-themes`
 # for a list of all available themes
 --theme="gruvbox-dark"
---style="numbers,header,grid"
+--style="full"
+
+# less -r passes Nerd Font icons through; -F exits on short output
+--pager="less -rF"

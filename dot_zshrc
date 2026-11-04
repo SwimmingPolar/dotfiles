@@ -84,7 +84,7 @@ unset _file
 ########### Environment variables ###########
 #############################################
 export EDITOR=nvim
-export MANPAGER="sh -c 'col -bx | bat --wrap never -l man --style=full'"
+export MANPAGER="sh -c 'col -bx | bat --wrap never -l man'"
 export EZA_ICON_SPACING=2
 
 #############################################
@@ -93,7 +93,6 @@ export EZA_ICON_SPACING=2
 alias nv="nvim"
 alias l="eza -1 --icons=always"
 alias ll="eza -1l --icons=always"
-alias bat="bat --style=full"
 alias ltree="eza --icons=always --tree"
 alias lt="ltree"
 alias leetcode="nvim leetcode.nvim"
