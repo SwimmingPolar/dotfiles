@@ -41,7 +41,7 @@ Created welcome-email.md for Northwind Traders, signed by Dana Kim, with the kic
 session: claude-e810334e
 folder: /Users/you/Projects/onboarding
 permissions: this Codex session (profile:managed/restricted)
-records: /Users/you/Projects/onboarding/.session
+records: /Users/you/Projects/onboarding/.skills/claude-codex-mcp/sessions
 ```
 
 **More context.** If the Content isn't enough to do the task without guessing at something that matters, the sub-agent doesn't guess. Its Answer starts with `More context needed:` and lists exactly what's missing. The calling agent judges whether each item is necessary and legitimate to share (never secrets or anything outside the task) and supplies what is, in one of two ways:
@@ -50,6 +50,13 @@ records: /Users/you/Projects/onboarding/.session
 - **Start a new session:** call again without `session`, with the full task plus the added context in `content`.
 
 There are no caps on any of this. The calling agent decides when it has what it needs.
+
+**Getting the Answer.** Neither agent waits for the Answer in its chat. A call returns at once with a job id, and the Answer comes back in the background, through whatever the calling agent has:
+
+- **Codex.** The bridge sends the Answer to the Codex chat that made the call, as an `ask_claude` tool result (an App Server `turn/start` through `codex app-server proxy`). An idle chat starts a turn; a busy one takes it at its next step. It's sent at most once, and `callback` in the job's record says what happened. With `wakeCodex: false`, Codex calls `check_job` from its own background scheduling instead.
+- **Claude.** Claude Code wakes Claude when a background command exits, so the result gives a command to run in the background, `node server.mjs --wait <job_id>`, which exits with the Answer as soon as Codex finishes. Where Claude can't run one, such as Claude Desktop's chat, it uses a scheduled task or a wake-up that calls `check_job`.
+
+A call waits in the chat only if it's given `wait_seconds`.
 
 ## Who decides what
 
@@ -70,19 +77,19 @@ The sub-agent gets the calling agent's permissions. It never asks you anything: 
 | Codex | **This Codex session's permissions**, which Codex shares with the bridge on every call. Read-only → Claude can read and search only. Workspace-write → Claude's auto mode: edits in the folder, commands, risky actions checked automatically. Full access → no checks. Network off → no web tools. If Codex shares nothing, Claude uses its own settings (`~/.claude/settings.json`). |
 | Claude Desktop | **Codex's own settings**, from `~/.codex/config.toml`, the file the Codex app uses. Claude Desktop doesn't share its permission settings with MCP servers, so the bridge adds no overrides. If you want Codex to edit files when Claude delegates, set `sandbox_mode = "workspace-write"` at the top of that file. |
 
-**Folder.** The sub-agent works where the calling agent works. From Codex, that's the session's working folder (or a folder inside it you pass as `folder`). From Claude Desktop, the calling agent passes the folder. When a chat has no folder of its own, the sub-agent works in the system temp folder, `/tmp`. That includes a ChatGPT project chat in Codex, which Codex runs in its internal folder (`~/.codex/.chatgpt-projects/...`), and a chat whose folder is the root or your whole home folder. The result's `note:` line says when this happened. A folder the calling agent names explicitly is used as given. A folder outside the calling agent's own is refused. Claude as a sub-agent also can't read outside the folder (`claude.blockOutsideReads`).
+**Folder.** The sub-agent works where the calling agent works. From Codex, that's the session's working folder (or a folder inside it you pass as `folder`). From Claude Desktop, the calling agent passes the folder. When a chat has no folder of its own, the sub-agent works in the system temp folder, `/tmp`. That includes a ChatGPT project chat in Codex, which Codex runs in its internal folder (`~/.codex/.chatgpt-projects/...`); a chat the Codex app filed under `~/Documents/Codex/<date>/` because you didn't pick a project; and a chat whose folder is the root or your whole home folder. A project you keep in `~/Documents/Codex` under its own name is a real folder. The result's `note:` line says when this happened. A folder the calling agent names explicitly is used as given. A folder outside the calling agent's own is refused. Claude as a sub-agent also can't read outside the folder (`claude.blockOutsideReads`).
 
 **One level only.** A sub-agent can't delegate further: its own bridge refuses, and the bridge is turned off inside a Codex sub-agent.
 
 ## Sessions and records
 
-Each delegation gets a session id such as `claude-1a2b3c4d`, returned in the result. Everything about a folder's delegations is kept in that folder, in `.session/`:
+Each delegation gets a session id such as `claude-1a2b3c4d`, returned in the result. Everything about a folder's delegations is kept in that folder, in `.skills/claude-codex-mcp/sessions/`:
 
 - `sessions.json`: each session's id, title, and the agent's own session id.
 - `history.jsonl`: one line per delegation, with its title and result (answer, more context, error or cancelled).
 - `jobs/`: each delegation's full record (title, content, Answer, timing).
 
-Secrets are redacted. When the folder is in git, the bridge adds `.session/` to that folder's `.gitignore`. Before each delegation the bridge checks it can create and write `.session/`. If it can't, for example in a read-only folder or one macOS privacy settings block, the delegation still runs and the records go to `~/Library/Caches/claude-codex-bridge/folders/`. The result's `records:` line always says where they went.
+Secrets are redacted. When the folder is in git, the bridge adds `.skills/claude-codex-mcp/sessions/` to that folder's `.gitignore`. A folder's older records in `.session/` are moved there the first time the bridge uses the folder, when `.session/` holds only the bridge's own files. Before each delegation the bridge checks it can create and write its records folder. If it can't, for example in a read-only folder or one macOS privacy settings block, the delegation still runs and the records go to `~/Library/Caches/claude-codex-bridge/folders/`. The result's `records:` line always says where they went.
 
 **Nothing is written to the bridge's own folder** while it runs. The only exception is `set_models`, which updates `bridge.config.json` when you ask it to. A small index of running delegations (so any app can check or cancel them), stop markers and a diagnostic `bridge.log` live in `~/Library/Caches/claude-codex-bridge`; `node server.mjs --paths` prints these locations. If the calling agent loses a session id, for example after its context is compacted, `list_sessions` shows them by title. You can also open a sub-agent's conversation yourself: `list_sessions` prints the `claude --resume …` or `codex resume …` command.
 
@@ -92,7 +99,7 @@ Secrets are redacted. When the folder is in git, the bridge adds `.session/` to 
 | --- | --- |
 | Ask the calling agent to cancel it (`cancel_job`) | Stopped, along with everything it started. Works for delegations from other chats or apps too. |
 | Run `node server.mjs --cancel all` (or `--cancel <job_id>`) | Stopped. `--jobs` lists what's running. |
-| Press stop in the calling app | Stopped, if the app tells the bridge (`notifications/cancelled`). Codex currently doesn't send this ([openai/codex#26956](https://github.com/openai/codex/issues/26956)), so after stopping Codex, the Claude sub-agent finishes its run; use `cancel_job` or `--cancel` to stop it. |
+| Press stop in the calling app | Not stopped: the call has already returned. Use `cancel_job` or `--cancel`. |
 | Quit or force quit the calling app | Stopped. |
 | The bridge itself is killed | Stopped within about 2 seconds, by a small watchdog. |
 
@@ -114,8 +121,8 @@ The Codex list is read live from `codex debug models`. For Claude, `opus`, `sonn
 
 | Tool | What it does |
 | --- | --- |
-| `ask_claude` / `ask_codex` | The exchange: `title`, `content`, and optionally `session` (to append) and `folder`. |
-| `check_job` | The Answer of a delegation that was still running when the call returned. |
+| `ask_claude` / `ask_codex` | The exchange: `title`, `content`, and optionally `session` (to append) and `folder`. Returns at once with a job id. |
+| `check_job` | The Answer of a delegation, or that it's still running. |
 | `cancel_job` | Stops a running delegation. |
 | `list_sessions` | Delegations in a folder, by title, with their session ids. |
 | `view_changes` | Git status and diff of a folder. |
@@ -130,6 +137,7 @@ The Codex list is read live from `codex debug models`. For Claude, `opus`, `sonn
 | `claude.blockOutsideReads` | `true` (default): Claude as a sub-agent can't read outside the task's folder. |
 | `cancelOnStop` | `true` (default): stopping the calling agent stops the sub-agent, when the app reports it. |
 | `useApiKeys` | `false` (default): the sub-agent's API-key variables are removed, so it runs on your subscription. |
+| `wakeCodex` | `true` (default): a delegation from Codex that's still running when its call returns sends its Answer to that Codex chat when it ends. |
 
 The bridge reads this file when it starts, except `set_models`, which applies at once. After editing it by hand, restart the app on that side.
 
@@ -140,6 +148,7 @@ node server.mjs --try claude --folder DIR --title "Summary" "Content"      # one
 node server.mjs --try claude --folder DIR --title "Summary" --session ID "More context"
 node server.mjs --try claude --level auto ...                              # pretend the Codex session is workspace-write
 node server.mjs --sessions [--folder DIR]
+node server.mjs --wait JOB_ID                                              # wait for a delegation to end, then print its result
 ```
 
 ## Troubleshooting

@@ -9,10 +9,11 @@
 //   node server.mjs --caller claude   -> exposes ask_codex   (added to Claude Desktop)
 //   node server.mjs --try claude|codex --folder DIR --title "..." [--session ID] [--level read|auto|full] "content"
 //   node server.mjs --sessions [--folder DIR]
+//   node server.mjs --wait JOB_ID      (blocks until a delegation ends, then prints its result)
 //
 // Nothing is written to the bridge's own folder while it runs (only `set_models` updates its
-// config). Each task folder gets a .session/ folder - sessions.json, history.jsonl and one record
-// per delegation in jobs/ - which is added to that folder's .gitignore. A small cross-app index of
+// config). Each task folder gets a .skills/claude-codex-mcp/sessions/ folder - sessions.json,
+// history.jsonl and one record per delegation in jobs/ - which is added to that folder's .gitignore. A small cross-app index of
 // running jobs, stop markers and a diagnostic log live in ~/Library/Caches/claude-codex-bridge.
 // Secrets are redacted everywhere.
 
@@ -36,7 +37,8 @@ const STATE_DIR = process.env.CLAUDE_CODEX_BRIDGE_STATE_DIR || process.env.CLAUD
 const LOG_DIR = STATE_DIR; // bridge.log (diagnostics) and cancel/ markers
 const JOB_DIR = path.join(STATE_DIR, 'jobs'); // one small pointer per job: where its record is, and whether it runs
 const PROJECTS_INDEX = path.join(STATE_DIR, 'projects.json');
-const REG_DIR_NAME = '.session'; // per task folder
+const REG_DIR_NAME = path.join('.skills', 'claude-codex-mcp', 'sessions'); // per task folder
+const LEGACY_REG_DIR_NAME = '.session'; // where the records were kept before
 const DEPTH_VAR = 'CLAUDE_CODEX_BRIDGE_DEPTH';
 const DEPTH = Number(process.env[DEPTH_VAR] || 0);
 
@@ -48,6 +50,7 @@ const DEFAULTS = {
   childPath: process.env.PATH || '/usr/bin:/bin:/usr/sbin:/sbin',
   cancelOnStop: true, // stopping the calling agent stops the sub-agent (unless the app only timed out)
   useApiKeys: false, // false = sub-agents always run on your subscriptions (API-key env vars are removed)
+  wakeCodex: true, // a delegation from Codex that outlives its call sends its Answer to that Codex chat when it ends
   claude: { model: null, effort: null, blockOutsideReads: true },
   codex: { model: null, effort: null, bridgeServerName: 'claude_bridge' },
 };
@@ -116,12 +119,13 @@ function logEvent(event, data = {}) {
   try { fs.appendFileSync(path.join(LOG_DIR, 'bridge.log'), line + '\n'); } catch { /* ignore */ }
 }
 
-// The full record (title, content, answer) is kept with the task, in <folder>/.session/jobs/.
+// The full record (title, content, answer) is kept with the task, in <folder>/.skills/claude-codex-mcp/sessions/jobs/.
 // The pointer in the state dir lets check_job, cancel_job and --jobs find it from any app.
 function saveJob(job) {
   const record = { ...job };
   delete record.proc;
   delete record.done;
+  delete record.waiters;
   if (job.folder) {
     try { writeJsonAtomic(path.join(sessionDir(job.folder).dir, 'jobs', `${job.id}.json`), redact(record)); } catch { /* ignore */ }
   }
@@ -133,24 +137,29 @@ function loadJobFromDisk(id) {
   if (!/^[a-f0-9]{8}$/.test(id)) return null;
   let pointer;
   try { pointer = JSON.parse(fs.readFileSync(path.join(JOB_DIR, `${id}.json`), 'utf8')); } catch { return null; }
-  try {
-    const full = JSON.parse(fs.readFileSync(path.join(pointer.records || path.join(pointer.folder, REG_DIR_NAME), 'jobs', `${id}.json`), 'utf8'));
-    return { ...full, pid: full.pid || pointer.pid };
-  } catch { return pointer; } // the task folder moved or its .session/ was deleted
+  // Records moved from the old location are found in the new one.
+  for (const dir of [pointer.records, pointer.folder && path.join(pointer.folder, REG_DIR_NAME)].filter(Boolean)) {
+    try {
+      const full = JSON.parse(fs.readFileSync(path.join(dir, 'jobs', `${id}.json`), 'utf8'));
+      return { ...full, pid: full.pid || pointer.pid };
+    } catch { /* try the next place */ }
+  }
+  return pointer; // the task folder moved or its records were deleted
 }
 
 // ------------------------------------------------------------- registry ---
-// <folder>/.session/sessions.json : the sessions started in this folder, by session id
-// <folder>/.session/history.jsonl : one line per delegation
-// <folder>/.session/jobs/<id>.json : each delegation's full record
+// <folder>/.skills/claude-codex-mcp/sessions/sessions.json : the sessions started in this folder, by session id
+// <folder>/.skills/claude-codex-mcp/sessions/history.jsonl : one line per delegation
+// <folder>/.skills/claude-codex-mcp/sessions/jobs/<id>.json : each delegation's full record
 
-// Records for a folder go in <folder>/.session. The bridge checks it can create and write that
-// folder; when it can't (a read-only folder, or macOS privacy settings blocking the app), the
-// records go to the state dir instead, and the result says where.
+// Records for a folder go in <folder>/.skills/claude-codex-mcp/sessions. The bridge checks it can
+// create and write that folder; when it can't (a read-only folder, or macOS privacy settings
+// blocking the app), the records go to the state dir instead, and the result says where.
 const sessionDirs = new Map(); // folder -> { dir, inFolder, reason }
 function sessionDir(folder) {
   if (sessionDirs.has(folder)) return sessionDirs.get(folder);
   const own = path.join(folder, REG_DIR_NAME);
+  moveLegacyRecords(folder, own);
   let out;
   try {
     fs.mkdirSync(own, { recursive: true });
@@ -165,6 +174,20 @@ function sessionDir(folder) {
   }
   sessionDirs.set(folder, out);
   return out;
+}
+
+// Move a folder's records from the old <folder>/.session, so its earlier sessions can still be
+// continued, but only when that folder holds nothing except the bridge's own files.
+function moveLegacyRecords(folder, own) {
+  const old = path.join(folder, LEGACY_REG_DIR_NAME);
+  try {
+    if (fs.existsSync(own) || !fs.existsSync(path.join(old, 'sessions.json'))) return;
+    const ours = ['sessions.json', 'history.jsonl', 'jobs', 'README.md'];
+    if (!fs.readdirSync(old).every((f) => ours.includes(f) || f.endsWith('.tmp'))) return;
+    fs.mkdirSync(path.dirname(own), { recursive: true });
+    fs.renameSync(old, own);
+    logEvent('records_moved', { from: old, to: own });
+  } catch (err) { logEvent('records_move_failed', { from: old, error: String(err.message || err) }); }
 }
 
 function regPaths(folder) {
@@ -187,7 +210,7 @@ function saveRegistry(cfg, folder, reg) {
   writeJsonAtomic(p.sessions, redact(reg));
   if (fresh) {
     try {
-      fs.writeFileSync(path.join(p.dir, 'README.md'), '# .session (claude-codex-bridge)\n\nWritten by claude-codex-bridge for the delegations started in this folder. `sessions.json` lists the sessions (id, title, the agent\'s own session id), `history.jsonl` has one line per delegation, and `jobs/` has each delegation\'s full record. Secrets are redacted. Agents should not edit these files. The folder is listed in .gitignore; delete it whenever you like.\n');
+      fs.writeFileSync(path.join(p.dir, 'README.md'), '# Delegation records (claude-codex-bridge)\n\nWritten by claude-codex-bridge for the delegations started in this folder. `sessions.json` lists the sessions (id, title, the agent\'s own session id), `history.jsonl` has one line per delegation, and `jobs/` has each delegation\'s full record. Secrets are redacted. Agents should not edit these files. The folder is listed in .gitignore; delete it whenever you like.\n');
     } catch { /* ignore */ }
   }
   if (sessionDir(folder).inFolder) gitIgnore(cfg, folder);
@@ -204,7 +227,7 @@ function appendHistory(folder, entry) {
   try { ensureDir(p.dir); fs.appendFileSync(p.history, JSON.stringify(redact(entry)) + '\n'); } catch { /* ignore */ }
 }
 
-// Keep .session/ out of git: add it to the task folder's .gitignore when the folder is in a repository.
+// Keep the records out of git: add them to the task folder's .gitignore when the folder is in a repository.
 const gitIgnored = new Set();
 function gitIgnore(cfg, folder) {
   if (gitIgnored.has(folder)) return;
@@ -214,7 +237,7 @@ function gitIgnore(cfg, folder) {
     const file = path.join(folder, '.gitignore');
     try {
       const cur = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
-      const listed = cur.split('\n').some((l) => ['.session', '.session/', '/.session', '/.session/'].includes(l.trim()));
+      const listed = cur.split('\n').some((l) => [REG_DIR_NAME, `${REG_DIR_NAME}/`, `/${REG_DIR_NAME}`, `/${REG_DIR_NAME}/`].includes(l.trim()));
       if (!listed) fs.appendFileSync(file, `${cur && !cur.endsWith('\n') ? '\n' : ''}# claude-codex-bridge delegation records\n${REG_DIR_NAME}/\n`);
     } catch { /* ignore */ }
   });
@@ -268,7 +291,8 @@ async function gitStatus(cfg, folder) {
 }
 
 async function recentFiles(folder, sinceMs, limit = 50) {
-  const skip = new Set(['.git', 'node_modules', '.venv', 'venv', '__pycache__', 'dist', 'build', '.next', 'target', REG_DIR_NAME]);
+  const skip = new Set(['.git', 'node_modules', '.venv', 'venv', '__pycache__', 'dist', 'build', '.next', 'target']);
+  const records = path.join(folder, REG_DIR_NAME);
   const out = [];
   async function walk(dir, depth) {
     if (out.length >= limit || depth > 6) return;
@@ -276,8 +300,8 @@ async function recentFiles(folder, sinceMs, limit = 50) {
     try { entries = await fsp.readdir(dir, { withFileTypes: true }); } catch { return; }
     for (const e of entries) {
       if (out.length >= limit) return;
-      if (skip.has(e.name)) continue;
       const full = path.join(dir, e.name);
+      if (skip.has(e.name) || full === records) continue;
       if (e.isDirectory()) await walk(full, depth + 1);
       else if (e.isFile()) {
         try { if ((await fsp.stat(full)).mtimeMs >= sinceMs) out.push(path.relative(folder, full)); } catch { /* ignore */ }
@@ -308,8 +332,9 @@ function expandHome(p) {
 }
 
 // A chat "has no folder" when its app gives none, or gives one that isn't a folder the user chose:
-// the root, the whole home folder, or an app's own internal folder (Codex runs ChatGPT-project
-// chats in ~/.codex/.chatgpt-projects/...). Then the sub-agent works in the system temp folder.
+// the root, the whole home folder, an app's own internal folder (Codex runs ChatGPT-project chats
+// in ~/.codex/.chatgpt-projects/...), or the dated folder the Codex app makes for a chat without a
+// project (~/Documents/Codex/<YYYY-MM-DD>/<chat>). Then the sub-agent works in the system temp folder.
 async function appInternalDirs() {
   const home = os.homedir();
   const dirs = [path.join(home, '.codex'), path.join(home, 'Library', 'Application Support', 'Claude'), path.join(home, '.claude')];
@@ -320,6 +345,11 @@ async function appInternalDirs() {
 async function notAChosenFolder(dir) {
   const home = (await realDir(os.homedir())) || os.homedir();
   if (dir === path.parse(dir).root || dir === home) return true;
+  // The Codex app files a chat without a chosen project under ~/Documents/Codex/<YYYY-MM-DD>/<chat>.
+  const codexChats = (await realDir(path.join(home, 'Documents', 'Codex'))) || path.join(home, 'Documents', 'Codex');
+  if (dir === codexChats) return true;
+  const rel = path.relative(codexChats, dir);
+  if (rel && !rel.startsWith('..') && !path.isAbsolute(rel) && /^\d{4}-\d{2}-\d{2}(?:[\\/]|$)/.test(rel)) return true;
   return (await appInternalDirs()).some((d) => isInside(dir, d));
 }
 
@@ -812,6 +842,10 @@ async function startJob(cfg, { agent, caller, args, perm, where }) {
         appended: Boolean(resumeId), result, durationSec: job.durationSec, permissions: perm.source,
         answer: firstLine(job.answer || job.error || ''),
       });
+      if (job.callback) {
+        if (job.waiters > 0) job.callback.state = 'collected'; // a call waiting right now returns the Answer
+        else if (job.callback.state === 'armed' && job.status !== 'cancelled') sendCallback(cfg, job);
+      }
       saveJob(job);
       logEvent('job_finished', { job: job.id, agent, status: job.status, result, durationSec: job.durationSec, session: sid, agentSessionId: job.agentSessionId });
     }
@@ -821,11 +855,17 @@ async function startJob(cfg, { agent, caller, args, perm, where }) {
 
 async function waitForJob(job, seconds, progress) {
   if (job.status !== 'running' || !job.done) return;
-  const deadline = Date.now() + seconds * 1000;
-  let tick = 0;
-  while (job.status === 'running' && Date.now() < deadline) {
-    await Promise.race([job.done, sleep(Math.min(10000, deadline - Date.now()))]);
-    if (job.status === 'running') progress?.(++tick, `${AGENT_NAME[job.agent]} is still working (job ${job.id})`);
+  job.waiters = (job.waiters || 0) + 1;
+  try {
+    const deadline = Date.now() + seconds * 1000;
+    let tick = 0;
+    while (job.status === 'running' && Date.now() < deadline) {
+      await Promise.race([job.done, sleep(Math.min(10000, deadline - Date.now()))]);
+      if (job.status === 'running') progress?.(++tick, `${AGENT_NAME[job.agent]} is still working (job ${job.id})`);
+    }
+  } finally {
+    // The last call to stop waiting before the job ends hands its Answer to the callback, if it has one.
+    if (--job.waiters === 0 && job.status === 'running' && job.callback?.state === 'pending') job.callback.state = 'armed';
   }
 }
 
@@ -835,7 +875,15 @@ function describeJob(job) {
   const lines = [`Title: ${job.title}`];
   if (job.status === 'running') {
     const secs = Math.round((Date.now() - Date.parse(job.startedAt)) / 1000);
-    lines.push(`${Name} is still working (job ${job.id}, ${secs}s so far). Call check_job with job_id "${job.id}" to get the Answer.`);
+    lines.push(`${Name} is still working (job ${job.id}, ${secs}s so far). Don't wait for it in this chat.`);
+    if (job.callback?.state === 'armed') {
+      lines.push(`Its Answer will be sent to this chat by itself as soon as ${Name} finishes, whether you are working or your turn has ended. Go on with other work, or end your turn if you need the Answer first.`);
+    } else if (job.caller === 'claude') {
+      // Claude Code wakes the agent when a background command exits, so the Answer can arrive on its own.
+      lines.push(`Get the Answer in the background: if you can run a shell command in the background that wakes you when it exits, run \`"${process.execPath}" "${fileURLToPath(import.meta.url)}" --wait ${job.id}\` that way; it exits with the Answer as soon as ${Name} finishes. Otherwise use whatever scheduling you have (a scheduled task or a wake-up) to call check_job with job_id "${job.id}" later.`);
+    } else {
+      lines.push(`Use whatever background scheduling you have to call check_job with job_id "${job.id}" later.`);
+    }
   } else if (job.status === 'cancelled') {
     lines.push(`Cancelled: ${job.error || 'stopped.'} Files ${Name} already changed stay changed.`);
   } else if (job.status === 'failed') {
@@ -849,6 +897,133 @@ function describeJob(job) {
   if (rd) lines.push(`records: ${rd.dir}${rd.inFolder ? '' : ` (${rd.reason})`}`);
   if (job.denials?.length) lines.push(`refused by permissions: ${job.denials.join('; ')}`);
   return lines.join('\n');
+}
+
+// -------------------------------------------------------------- callbacks ---
+// A delegation from Codex that is still running when its call returns sends its result to the Codex
+// chat that started it when it ends: a turn/start with a tool output on the Codex App Server,
+// reached through `codex app-server proxy`. An idle chat starts a turn; a busy one takes the output
+// at its next step. It is sent at most once: no retry once the request may have reached the server.
+
+const callbacks = new Set(); // deliveries in flight, so shutdown can let them finish
+
+function sendCallback(cfg, job) {
+  const cb = job.callback;
+  cb.state = 'sending';
+  const output = `Result of the delegation you started earlier with ask_${job.agent} (job ${job.id}). ${AGENT_NAME[job.agent]} finished after your call returned, so the bridge sends it here.\n\n${describeJob(job)}`;
+  const toolOutput = { name: `ask_${job.agent}`, namespace: `mcp__${cfg.codex.bridgeServerName || 'claude_bridge'}`, output };
+  const p = (async () => {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        const turnId = await codexTurnStart(cfg, cb.threadId, toolOutput);
+        Object.assign(cb, { state: 'sent', turnId, sentAt: new Date().toISOString() });
+        logEvent('callback_sent', { job: job.id, thread: cb.threadId, turn: turnId, attempt });
+        break;
+      } catch (err) {
+        const retry = !err.maybeDelivered && attempt < 3;
+        logEvent('callback_failed', { job: job.id, thread: cb.threadId, attempt, retry, error: String(err.message || err) });
+        if (!retry) { Object.assign(cb, { state: err.maybeDelivered ? 'unknown' : 'failed', error: String(err.message || err) }); break; }
+        await sleep(attempt * 5000);
+      }
+    }
+    saveJob(job);
+  })();
+  callbacks.add(p);
+  p.finally(() => callbacks.delete(p));
+}
+
+// One App Server session over the proxy's WebSocket: initialize, load the thread, start the turn.
+// Resolves with the turn id. An error says whether turn/start may already have been sent.
+function codexTurnStart(cfg, threadId, toolOutput) {
+  return new Promise((resolve, reject) => {
+    let proxy;
+    try {
+      proxy = spawn(cfg.codexPath, ['app-server', 'proxy'], { stdio: ['pipe', 'pipe', 'pipe'], env: { ...process.env, PATH: cfg.childPath } });
+    } catch (err) { reject(err); return; }
+    let settled = false;
+    let turnSent = false;
+    let open = false; // past the WebSocket handshake
+    let buf = Buffer.alloc(0);
+    let parts = [];
+    let stderr = '';
+    let nextId = 1;
+    const waiting = new Map();
+    const finish = (err, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      try { proxy.kill(); } catch { /* gone */ }
+      if (err) { err.maybeDelivered = turnSent && !err.rejected; reject(err); } else resolve(value);
+    };
+    const timer = setTimeout(() => finish(new Error('The Codex App Server did not answer within 30 seconds.')), 30000);
+    const frame = (op, data) => { // client frames are masked
+      const n = data.length;
+      const len = n < 126 ? Buffer.from([0x80 | n]) : n < 65536 ? Buffer.from([0x80 | 126, n >> 8, n & 255]) : Buffer.alloc(9);
+      if (n >= 65536) { len[0] = 0x80 | 127; len.writeBigUInt64BE(BigInt(n), 1); }
+      const mask = crypto.randomBytes(4);
+      const body = Buffer.alloc(n);
+      for (let i = 0; i < n; i++) body[i] = data[i] ^ mask[i % 4];
+      try { proxy.stdin.write(Buffer.concat([Buffer.from([0x80 | op]), len, mask, body])); } catch { /* closed */ }
+    };
+    const notify = (method, params) => frame(1, Buffer.from(JSON.stringify({ method, ...(params ? { params } : {}) })));
+    const call = (method, params) => new Promise((res, rej) => {
+      const id = nextId++;
+      waiting.set(id, { res, rej });
+      frame(1, Buffer.from(JSON.stringify({ id, method, params })));
+    });
+    const onMessage = (msg) => { // events from the server are ignored; only our replies matter
+      if (msg.method || !waiting.has(msg.id)) return;
+      const w = waiting.get(msg.id);
+      waiting.delete(msg.id);
+      if (msg.error) w.rej(Object.assign(new Error(`${msg.error.message || JSON.stringify(msg.error)}`), { rejected: true })); else w.res(msg.result);
+    };
+    const run = async () => {
+      await call('initialize', { clientInfo: { name: 'claude_codex_bridge', version: VERSION }, capabilities: { experimentalApi: true } });
+      notify('initialized');
+      await call('thread/resume', { threadId }).catch(() => {}); // loads an idle chat; turn/start reports a bad id
+      turnSent = true;
+      const r = await call('turn/start', { threadId, input: [], toolOutput });
+      return r?.turn?.id || null;
+    };
+    proxy.stdout.on('data', (d) => {
+      buf = Buffer.concat([buf, d]);
+      if (!open) {
+        const end = buf.indexOf('\r\n\r\n');
+        if (end < 0) return;
+        const head = buf.subarray(0, end).toString();
+        buf = buf.subarray(end + 4);
+        if (!/^HTTP\/1\.1 101/.test(head)) return finish(new Error(`The Codex App Server refused the connection: ${firstLine(head, 200)}`));
+        open = true;
+        run().then((v) => finish(null, v), (e) => finish(e));
+      }
+      while (buf.length >= 2) {
+        let n = buf[1] & 127;
+        let off = 2;
+        if (n === 126) { if (buf.length < 4) return; n = buf.readUInt16BE(2); off = 4; }
+        if (n === 127) { if (buf.length < 10) return; n = Number(buf.readBigUInt64BE(2)); off = 10; }
+        const mask = buf[1] & 128 ? buf.subarray(off, off + 4) : null;
+        if (mask) off += 4;
+        if (buf.length < off + n) return;
+        const data = Buffer.from(buf.subarray(off, off + n));
+        if (mask) for (let i = 0; i < n; i++) data[i] ^= mask[i % 4];
+        const fin = buf[0] & 128;
+        const op = buf[0] & 15;
+        buf = buf.subarray(off + n);
+        if (op === 9) frame(10, data); // ping -> pong
+        else if (op === 8) return finish(new Error('The Codex App Server closed the connection.'));
+        else if (op <= 2) {
+          parts.push(data);
+          if (fin) { const text = Buffer.concat(parts).toString(); parts = []; try { onMessage(JSON.parse(text)); } catch { /* not JSON */ } }
+        }
+      }
+    });
+    proxy.stderr.on('data', (d) => { if (stderr.length < 8192) stderr += d; });
+    proxy.stdin.on('error', () => { /* proxy exited */ });
+    proxy.on('error', (err) => finish(err.code === 'ENOENT' ? new Error(`Codex was not found at "${cfg.codexPath}".`) : err));
+    proxy.on('close', (code) => finish(new Error(`codex app-server proxy exited (code ${code})${stderr.trim() ? `: ${tail(stderr)}` : '.'}`)));
+    const key = crypto.randomBytes(16).toString('base64');
+    proxy.stdin.write(`GET / HTTP/1.1\r\nHost: localhost\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: ${key}\r\n\r\n`);
+  });
 }
 
 // --------------------------------------------------------------- sessions ---
@@ -1042,21 +1217,26 @@ async function setModels(cfg, agent, args) {
 
 // ------------------------------------------------------------------ tools ---
 
-function toolDefs(caller, maxWait) {
+function toolDefs(caller, maxWait, wake = false) {
   const agent = caller === 'codex' ? 'claude' : 'codex';
   const Name = AGENT_NAME[agent];
-  const waitProp = { type: 'number', description: `Seconds to wait for the Answer before returning a job_id instead (default and max ${maxWait}).` };
+  const later = wake
+    ? `${Name}'s Answer arrives in this chat by itself when ${Name} finishes`
+    : 'the result says how to get the Answer in the background';
+  const waitProp = { type: 'number', description: `Leave it out: the call returns at once with a job id, and ${later}. Set it only to make this call wait that many seconds first.` };
+  const checkWaitProp = { type: 'number', description: 'Leave it out to get the current state at once. Set it only to make this call wait that many seconds for the Answer first.' };
   const permLine = caller === 'codex'
     ? `${Name} gets this session's permissions (read-only, workspace-write or full access) and never asks the user anything.`
     : `${Name} runs with the permissions in its own settings, the same ones the Codex app uses, and never asks the user anything.`;
   const folderDesc = caller === 'codex'
-    ? 'The folder the task is in. Leave it out to use this session\'s working folder; any other folder must be inside it. If this session has no folder of its own (for example a ChatGPT project chat), leaving it out means the system temp folder (/tmp), and you may name any folder the user gave you.'
+    ? 'The folder the task is in. Leave it out to use this session\'s working folder; any other folder must be inside it. If this session has no folder of its own (a ChatGPT project chat, or a chat the Codex app filed under ~/Documents/Codex/<date>/), leaving it out means the system temp folder (/tmp), and you may name any folder the user gave you.'
     : `The absolute path of the folder the task is in. ${Name} works only there. Leave it out when this chat has no folder: ${Name} then works in the system temp folder (/tmp).`;
   const ask = {
     name: `ask_${agent}`,
     title: `Work with ${Name}`,
     description: [
       `Delegate one task to ${Name}. The exchange is: you send a Title and a Content, ${Name} replies with an Answer, and the delegation is done. Use it when the user wants ${Name} involved; you decide which part of the work to delegate.`,
+      `The call returns at once with a job id, and ${later}, so you never wait for it in the chat.`,
       `Title: one line that summarizes the task. Content: everything ${Name} needs, because it sees nothing else: the goal, the files and folders involved, the inputs, the constraints, and what the finished result looks like.`,
       'Resolve anything ambiguous before you call. Decide it yourself when you can; when only the user can, ask them the way your app normally lets you (if your session is set to never ask, decide and state the assumption in the Content).',
       permLine,
@@ -1082,8 +1262,8 @@ function toolDefs(caller, maxWait) {
     {
       name: 'check_job',
       title: 'Get a delegation\'s Answer',
-      description: `Wait for and return the Answer of a delegation that is still running (when ${ask.name} said ${Name} is still working).`,
-      inputSchema: { type: 'object', properties: { job_id: { type: 'string' }, wait_seconds: waitProp }, required: ['job_id'], additionalProperties: false },
+      description: `Return the Answer of a delegation (the job_id from ${ask.name}), or say that ${Name} is still working.`,
+      inputSchema: { type: 'object', properties: { job_id: { type: 'string' }, wait_seconds: checkWaitProp }, required: ['job_id'], additionalProperties: false },
       annotations: { title: 'Get a delegation\'s Answer', readOnlyHint: true, openWorldHint: false },
     },
     {
@@ -1199,7 +1379,7 @@ async function callTool(cfg, caller, maxWait, name, args, meta, progress, ctx) {
     if (extra.length) throw new UserError(`Unknown argument${extra.length > 1 ? 's' : ''}: ${extra.join(', ')}. ${name} takes ${allowed.length ? allowed.join(', ') : 'no arguments'}.`);
   }
   const clientRoots = ctx?.clientRoots || [];
-  const wait = Math.max(0, Math.min(Number(args.wait_seconds ?? maxWait), maxWait));
+  const wait = Math.max(0, Math.min(Number(args.wait_seconds ?? 0), maxWait)); // calls return at once unless asked to wait
   const agent = caller === 'codex' ? 'claude' : 'codex';
   const sandbox = caller === 'codex' ? parseSandboxMeta(meta) : null;
   if (caller === 'codex' && !sandboxLogged && name === `ask_${agent}`) {
@@ -1210,6 +1390,10 @@ async function callTool(cfg, caller, maxWait, name, args, meta, progress, ctx) {
     const where = await resolveWorkFolder(args, sandbox, clientRoots);
     const job = await startJob(cfg, { agent, caller, args, perm: callerPermission(agent, sandbox), where });
     if (ctx) ctx.jobId = job.id;
+    // Codex names the calling chat in each call's _meta, which is where a late Answer is sent.
+    if (caller === 'codex' && cfg.wakeCodex !== false && typeof meta?.threadId === 'string' && meta.threadId) {
+      job.callback = { threadId: meta.threadId, state: 'pending' };
+    }
     await waitForJob(job, wait, progress);
     return { text: describeJob(job), isError: job.status === 'failed' };
   }
@@ -1247,9 +1431,12 @@ async function callTool(cfg, caller, maxWait, name, args, meta, progress, ctx) {
 function serve(caller, maxWait) {
   const cfg = loadConfig();
   const agentName = caller === 'codex' ? 'Claude' : 'Codex';
-  const tools = toolDefs(caller, maxWait);
+  const tools = toolDefs(caller, maxWait, caller === 'codex' && cfg.wakeCodex !== false);
   const instructions = [
     `Delegate a task to ${agentName} with ${caller === 'codex' ? 'ask_claude' : 'ask_codex'}: send a Title (a one-line summary) and a Content (everything ${agentName} needs; it sees nothing else). ${agentName} replies with an Answer, and the delegation is done.`,
+    caller === 'codex' && cfg.wakeCodex !== false
+      ? `The call returns at once; ${agentName}'s Answer arrives in this chat by itself when ${agentName} finishes.`
+      : 'The call returns at once with a job id; get the Answer in the background as the result explains, not by waiting in the chat.',
     caller === 'codex' ? `${agentName} gets this session's permissions and never asks the user anything.` : `${agentName} runs with its own settings and never asks the user anything.`,
     `Resolve ambiguity before delegating. If the Answer starts with "${MORE_CONTEXT}", check that each request is needed and legitimate, then supply it: append it to the same session, or start a new session with the full task.`,
   ].join(' ');
@@ -1367,7 +1554,8 @@ function serve(caller, maxWait) {
       }
     }
     logEvent('server_stopped', { caller });
-    setTimeout(() => process.exit(0), 300).unref();
+    // Let an Answer already on its way to a Codex chat arrive (for a bounded time) before exiting.
+    Promise.race([Promise.allSettled([...callbacks]), sleep(15000)]).then(() => setTimeout(() => process.exit(0), 300).unref());
   };
   rl.on('close', shutdown);
   process.on('SIGTERM', shutdown);
@@ -1393,6 +1581,29 @@ async function tryMode(argv) {
   await job.done;
   process.stdout.write(describeJob(job) + '\n');
   process.exit(job.status === 'done' ? 0 : 1);
+}
+
+// --wait JOB_ID: block until a delegation started from any app or chat ends, then print its result.
+// Run as a background command by an agent that is woken when one exits (Claude Code), so the Answer
+// arrives as soon as it's ready instead of after a guessed delay.
+async function waitMode(argv) {
+  const id = typeof argv.wait === 'string' ? argv.wait.trim() : '';
+  if (!id) throw new UserError('--wait needs a job id, like --wait 1a2b3c4d.');
+  let gone = 0; // polls in a row where the job still says running but its process is gone
+  for (;;) {
+    const job = loadJobFromDisk(id);
+    if (!job) throw new UserError(`No job with id "${id}".`);
+    if (job.status !== 'running') {
+      process.stdout.write(describeJob(job) + '\n');
+      process.exit(job.status === 'done' ? 0 : 1);
+    }
+    gone = pidExists(job.pid) ? 0 : gone + 1;
+    if (gone >= 5) { // the result is saved right after the process exits; 10s is ample grace
+      process.stdout.write(`Title: ${job.title}\nError: the bridge process that ran job ${id} has stopped (the app may have restarted), so there is no Answer.\n`);
+      process.exit(1);
+    }
+    await sleep(2000);
+  }
 }
 
 function parseArgs(argv) {
@@ -1442,6 +1653,8 @@ if (!argv) {
       }
     }
   })().catch((err) => { process.stderr.write(`Error: ${err.message || err}\n`); process.exit(1); });
+} else if (argv.wait) {
+  waitMode(argv).catch((err) => { process.stderr.write(`Error: ${err.message || err}\n`); process.exit(2); });
 } else if (argv.try) {
   tryMode(argv).catch((err) => { process.stderr.write(`Error: ${err.message || err}\n`); process.exit(1); });
 } else {
@@ -1454,6 +1667,7 @@ if (!argv) {
       '       node server.mjs --models [claude|codex]     list models and the current defaults',
       '       node server.mjs --models claude --set-model opus --set-effort xhigh',
       '       node server.mjs --jobs                      list running delegations',
+      '       node server.mjs --wait JOB_ID               wait for a delegation to end and print its result',
       '       node server.mjs --cancel JOB_ID|all         stop delegations',
       '',
     ].join('\n'));

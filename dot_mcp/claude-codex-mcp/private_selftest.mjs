@@ -30,6 +30,7 @@ const args = new Set(process.argv.slice(2));
 const STAMP = new Date().toISOString().replace(/[:.]/g, '-');
 const RUN_DIR = path.join(fs.realpathSync(os.tmpdir()), 'claude-codex-bridge-selftest', `run-${STAMP}`);
 const PROJ = path.join(RUN_DIR, 'project');
+const RECORDS = path.join('.skills', 'claude-codex-mcp', 'sessions'); // a folder's records, inside it
 const TEST_CONFIG = path.join(RUN_DIR, 'bridge.config.json');
 
 const SECRETS = [
@@ -57,7 +58,7 @@ const read = (f) => { try { return fs.readFileSync(f, 'utf8'); } catch { return 
 const lines = (f) => (read(f) || '').split('\n').filter((l) => l.length);
 const field = (t, k) => (new RegExp(`^${k}: (.*)$`, 'm').exec(t) || [])[1] || '';
 const answerOf = (t) => { const m = /^Answer:\n([\s\S]*?)\n\nsession: /m.exec(t || ''); return m ? m[1] : null; };
-const registry = () => { try { return JSON.parse(read(path.join(PROJ, '.session', 'sessions.json'))).sessions; } catch { return {}; } };
+const registry = () => { try { return JSON.parse(read(path.join(PROJ, RECORDS, 'sessions.json'))).sessions; } catch { return {}; } };
 const bridgeFolderState = () => { const out = []; const walk = (d) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const f = path.join(d, e.name); if (f === REPORT) continue; if (e.isDirectory()) walk(f); else out.push(`${path.relative(HERE, f)}@${fs.statSync(f).mtimeMs}`); } }; try { walk(HERE); } catch { /* ignore */ } return out.sort().join('\n'); };
 const BRIDGE_BEFORE = bridgeFolderState();
 async function timed(fn) { const t = Date.now(); const r = await fn(); return [r, Math.round((Date.now() - t) / 1000)]; }
@@ -94,12 +95,14 @@ function startBridge(caller) {
     }
   });
   const req = (method, params) => new Promise((resolve) => { const n = id++; waiters.set(n, resolve); srv.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: n, method, params }) + '\n'); });
+  // Calls return at once by default; the direct checks wait in the call so each one sees its Answer.
+  const withWait = (name, a) => (/^(ask_|check_job$)/.test(name) && a && a.wait_seconds === undefined ? { ...a, wait_seconds: 600 } : a);
   const call = async (name, a, meta) => {
-    const r = await req('tools/call', { name, arguments: a, ...(meta ? { _meta: meta } : {}) });
+    const r = await req('tools/call', { name, arguments: withWait(name, a), ...(meta ? { _meta: meta } : {}) });
     if (r.error) return { text: `MCP error: ${r.error.message}`, isError: true };
     return { text: r.result.content[0].text, isError: r.result.isError };
   };
-  const startCall = (name, a, meta) => { const n = id++; srv.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: n, method: 'tools/call', params: { name, arguments: a, ...(meta ? { _meta: meta } : {}) } }) + '\n'); return n; };
+  const startCall = (name, a, meta) => { const n = id++; srv.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: n, method: 'tools/call', params: { name, arguments: withWait(name, a), ...(meta ? { _meta: meta } : {}) } }) + '\n'); return n; };
   const cancel = (requestId, reason) => srv.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/cancelled', params: { requestId, reason } }) + '\n');
   return { req, call, startCall, cancel, stop: () => srv.stdin.end() };
 }
@@ -161,7 +164,7 @@ function makeProject(cfg) {
     execFileSync('git', ['-c', 'user.email=selftest@local', '-c', 'user.name=selftest', 'commit', '-qm', 'init'], { cwd: PROJ });
   } catch { notes.push('git is not available, so the git checks were skipped.'); }
   // light models for the direct checks; everything else as installed
-  fs.writeFileSync(TEST_CONFIG, JSON.stringify({ ...cfg, claude: { ...(cfg.claude || {}), model: 'haiku', effort: 'low' }, codex: { ...(cfg.codex || {}), effort: 'low' } }, null, 2));
+  fs.writeFileSync(TEST_CONFIG, JSON.stringify({ ...cfg, wakeCodex: false, claude: { ...(cfg.claude || {}), model: 'haiku', effort: 'low' }, codex: { ...(cfg.codex || {}), effort: 'low' } }, null, 2));
 }
 
 async function directTests(agent) {
@@ -210,16 +213,16 @@ async function trackingTests() {
   const r = await b.call('list_sessions', { folder: PROJ });
   b.stop();
   record('list_sessions shows the sessions with their titles', /"Create hello-claude.txt"/.test(r.text) && /"Create hello-codex.txt"/.test(r.text), r.text);
-  const regDir = path.join(PROJ, '.session');
+  const regDir = path.join(PROJ, RECORDS);
   const hist = lines(path.join(regDir, 'history.jsonl'));
-  record(`.session/history.jsonl has a line per delegation (${hist.length})`, hist.length >= 6);
+  record(`${RECORDS}/history.jsonl has a line per delegation (${hist.length})`, hist.length >= 6);
   const jobs = (() => { try { return fs.readdirSync(path.join(regDir, 'jobs')); } catch { return []; } })();
-  record(`.session/jobs/ has each delegation's full record (${jobs.length})`, jobs.length >= 6);
+  record(`${RECORDS}/jobs/ has each delegation's full record (${jobs.length})`, jobs.length >= 6);
   const blob = [read(path.join(regDir, 'sessions.json')), hist.join('\n'), ...jobs.map((f) => read(path.join(regDir, 'jobs', f)))].join('\n');
   record('the records contain no API keys or tokens', !/\bsk-(ant-|proj-)?[A-Za-z0-9_-]{16,}|ANTHROPIC_API_KEY=|OPENAI_API_KEY=/.test(blob));
   if (fs.existsSync(path.join(PROJ, '.git'))) {
     const gi = read(path.join(PROJ, '.gitignore')) || '';
-    record('.session/ is in the folder\'s .gitignore, once', gi.split('\n').filter((l) => l.trim() === '.session/').length === 1, gi);
+    record(`${RECORDS}/ is in the folder's .gitignore, once`, gi.split('\n').filter((l) => l.trim() === `${RECORDS}/`).length === 1, gi);
   }
 }
 
@@ -229,7 +232,7 @@ async function folderTests() {
   await b.req('initialize', {});
   let [r, s] = await timed(async () => finish(b, await b.call('ask_codex', { title: 'Reply only', content: 'Reply with "Answer: ok". Do not create, change or delete any files.' })));
   const tmp = fs.realpathSync('/tmp');
-  record('with no folder set, the sub-agent works in /tmp and its records go to /tmp/.session', field(r.text, 'folder') === tmp && field(r.text, 'records') === path.join(tmp, '.session'), r.text, s);
+  record(`with no folder set, the sub-agent works in /tmp and its records go to /tmp/${RECORDS}`, field(r.text, 'folder') === tmp && field(r.text, 'records') === path.join(tmp, RECORDS), r.text, s);
   b.stop();
   b = startBridge('codex');
   await b.req('initialize', {});
@@ -263,7 +266,7 @@ async function stopTest(agent) {
   await b.req('initialize', {});
   const title = `stop test ${agent}`;
   const n = b.startCall(`ask_${agent}`, callArgs(agent, { title, content: 'Run the shell command `sleep 300` and wait for it to finish, then reply. Do not change any files.' }), caller === 'codex' ? codexMeta() : undefined);
-  const findJob = () => { try { const dir = path.join(PROJ, '.session', 'jobs'); return fs.readdirSync(dir).map((f) => { try { return JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { return null; } }).filter((j) => j && j.title === title && j.folder === fs.realpathSync(PROJ)).sort((a, x) => (a.startedAt < x.startedAt ? 1 : -1))[0] || null; } catch { return null; } };
+  const findJob = () => { try { const dir = path.join(PROJ, RECORDS, 'jobs'); return fs.readdirSync(dir).map((f) => { try { return JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { return null; } }).filter((j) => j && j.title === title && j.folder === fs.realpathSync(PROJ)).sort((a, x) => (a.startedAt < x.startedAt ? 1 : -1))[0] || null; } catch { return null; } };
   let job = null;
   for (let i = 0; i < 40 && !(job && job.pid); i++) { await sleep(500); job = findJob(); }
   await sleep(8000);
@@ -284,7 +287,8 @@ async function agentTests(cfg) {
     'Call the ask_claude tool from the claude_bridge MCP server exactly once with these arguments:',
     'title: Create from-codex-agent.txt',
     'content: Create a file named from-codex-agent.txt in the working folder containing exactly: ok',
-    'If the result says Claude is still working, call check_job with its job_id until you have the Answer.',
+    'wait_seconds: 600',
+    'If the result says Claude is still working, call check_job with its job_id and wait_seconds 600 until you have the Answer.',
     'Do not create or edit any files yourself. Then reply with the Answer from the result.',
   ].join('\n');
   let [res, s] = await timed(() => runCmd(cfg.codexPath, ['exec', '--skip-git-repo-check', '-s', 'workspace-write', '-C', PROJ, '-'],
@@ -309,7 +313,8 @@ async function agentTests(cfg) {
     'title: Create from-claude-agent.txt',
     'content: Create a file named from-claude-agent.txt in the working folder containing exactly: ok',
     `folder: ${PROJ}`,
-    'If the result says Codex is still working, call check_job with its job_id until you have the Answer.',
+    'wait_seconds: 600',
+    'If the result says Codex is still working, call check_job with its job_id and wait_seconds 600 until you have the Answer.',
     'Do not create or edit any files yourself. Then reply with the Answer from the result.',
   ].join('\n');
   const env = { ...process.env };

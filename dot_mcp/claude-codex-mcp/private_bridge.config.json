@@ -8,7 +8,7 @@
   },
   "codex": {
     "model": "gpt-6-astra",
-    "effort": "max",
+    "effort": "xhigh",
     "bridgeServerName": "claude_bridge"
   },
   "claudePath": "/Users/swimmingpolar/.local/bin/claude",
