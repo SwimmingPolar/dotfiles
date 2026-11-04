@@ -1,10 +1,17 @@
 export LANG="en_US.UTF-8"
 export LC_CTYPE="en_US.UTF-8"
 
-# If you come from bash you might have to change your $PATH.
-export PATH="$HOME/go:$HOME/go/bin:$HOME/.zsh/scripts:/usr/local/go/bin:$HOME/.local/bin:$HOME/bin:/usr/local/bin:$HOME/.cargo/bin:$PATH"
+typeset -U path PATH
+path=(
+  $HOME/go/bin
+  $HOME/.local/bin
+  /usr/local/bin
+  $HOME/.cargo/bin
+  ${path:#$HOME/.zsh/scripts}
+  $HOME/.zsh/scripts
+)
 
-# omz plugins configs mandatories(which should be invoked at the top of .zshrc)
+# omz plugins configs mandatories
 zstyle :omz:plugins:ssh-agent ssh-add-args --apple-load-keychain
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
@@ -25,248 +32,132 @@ fi
 source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
-# Load a few important annexes, without Turbo
-# (this is currently required for annexes)
-zinit light-mode for \
-    zdharma-continuum/zinit-annex-as-monitor \
-    zdharma-continuum/zinit-annex-bin-gem-node \
-    zdharma-continuum/zinit-annex-patch-dl \
-    zdharma-continuum/zinit-annex-rust
 ### End of Zinit's installer chunk
 
 #############################################
 ################## Prompt ###################
 #############################################
+zinit ice depth=1; zinit light romkatv/powerlevel10k
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 #############################################
 ################## Plugins ##################
 #############################################
-zinit ice depth=1; zinit light romkatv/powerlevel10k
 # disable zi from zinit to use zoxide's zi(interactive)
 zinit wait lucid atload'_zsh_autosuggest_start; unalias zi 2>/dev/null;' light-mode for \
     zsh-users/zsh-autosuggestions
 zinit light zsh-users/zsh-completions
-zinit light zdharma/history-search-multi-word
-zinit light zdharma/fast-syntax-highlighting
+# OMZ plugins below call functions from these OMZ libraries (clipcopy, git_current_branch)
+zinit snippet OMZL::clipboard.zsh
+zinit snippet OMZL::git.zsh
 zinit snippet OMZP::git
-zinit snippet OMZP::colored-man-pages
 zinit snippet OMZP::copypath
 zinit snippet OMZP::cp
-zinit ice as"zsh-completion"
-zinit snippet OMZP::docker
 zinit snippet OMZP::docker-compose
 zinit snippet OMZP::fzf
 zinit snippet OMZP::ssh-agent
-zinit snippet OMZP::z
+
+# Docker completion, generated with: docker completion zsh > ~/.docker/completions/_docker
+fpath=($HOME/.docker/completions $fpath)
+
+autoload -Uz compinit
+compinit
+zinit cdreplay -q
+
+# Should stay the last plugin loaded
+zinit light zdharma-continuum/fast-syntax-highlighting
 
 #############################################
 ############# Extra Configs #################
 #############################################
-dirs=(
-  .zsh/cmds
-  .zsh/keybindings
-  .zsh/hooks
-  .env
-)
-ignore=(
-  "."
-  ".keep"
-  ".DS_Store"
-)
-old_ifs=$IFS
-source_cur_dir() {
-  dir="$1"
-  while IFS= read -r -d '' file; do
-    # This removes everything before the last / (and including the / itself)
-    # Which will leave out only the filename
-    file_name=${file##*/}
-    # So the ignore list can be respected
-    if [[ ${ignore[*]} =~ $file_name ]]; then
-      continue
-    fi
-    # shell LSP do not allow sourcing file from variables hence the suppression sentence
-    # shellcheck disable=SC1090
-    source "$file"
-  done < <(find $dir -type f -print0)
-}
-IFS=$old_ifs
-for dir in "${dirs[@]}"; do
-  source_cur_dir "$HOME/$dir"
+# Load API keys from ~/.env (top level only; zsh globs skip dotfiles)
+for _file in $HOME/.env/*(N.); do
+  source "$_file"
 done
+unset _file
 
 #############################################
 ########### Environment variables ###########
 #############################################
-export EDITOR=vim
-export MANPAGER="sh -c 'col -bx | bat  --wrap never -l man --style=full'"
+export EDITOR=nvim
+export MANPAGER="sh -c 'col -bx | bat --wrap never -l man --style=full'"
+export EZA_ICON_SPACING=2
 
 #############################################
 ################## Aliases ##################
 #############################################
 alias nv="nvim"
-alias nvi="nvim"
-export EZA_ICON_SPACING=2
-alias ls="eza "
-alias l="eza -1h --icons"
-alias ll="eza -1"
-alias li="eza --icons"
-alias lll="ll -lh --icons"
-alias l2="ll"
-alias l3="lll"
-alias bat="bat --paging=always --style=full --color=always"
-alias escape="sed 's/\x1b\[[0-9;]*m//g'"
-alias aider="aider --env-file $HOME/.aider.env --sonnet"
-alias wcl="wezterm cli"
+alias l="eza -1"
+alias bat="bat --style=full"
 alias ltree="eza --icons=always --tree"
 alias lt="ltree"
 alias leetcode="nvim leetcode.nvim"
-alias so="source"
 alias czf="chezmoi forget"
 alias cza="chezmoi add"
 alias cz="chezmoi"
 alias czu="chezmoi re-add"
 alias czdf="chezmoi diff"
 alias czd="chezmoi cd"
-alias harlequin="harlequin --theme zenburn"
-alias hlq="harlequin"
 alias cdr='cd "$(git rev-parse --show-toplevel 2>/dev/null || echo ".")"'
-alias lgit="lazygit"
-alias lgt="lazygit"
 alias lg="lazygit"
-alias top="bpytop"
-alias clip="pbcopy"
-# AI assistant
-copy_and_glow() {
-  tee >(tr -d "\n" | pbcopy) | glow
-}
-aichat_with_model() {
-  if [[ "$1" == "--no-copy" ]]; then
-    shift
-    aichat -m "openrouter:anthropic/claude-opus-5" "$@" | glow
-  else
-    aichat -m "openrouter:anthropic/claude-opus-5" "$@" | copy_and_glow
-  fi
-}
-alias what="aichat_with_model --no-copy Short Answer: what "
-alias how="aichat_with_model -r %shell% Short Answer without any styling format such as markdown or quotes: how "
-alias explain="aichat_with_model --no-copy -r %explain-shell%"
-alias ask="aichat_with_model --no-copy User: "
-alias cli="aichat_with_model -r %shell%"
-alias codeai="aichat_with_model -r codas -c"
-alias generate="codeai"
-alias gen="codeai"
-alias ai="aichat_with_model"
-alias sdf="git diff | git-split-diffs --color | less -RFX"
-alias gdf="git diff | git-split-diffs --color | less -RFX"
-# about creating tempoarary file and directory
-export TMPFILE="/tmp/last-mktemp-path"
-if [ ! -f "$TMPFILE" ]; then
-    touch "$TMPFILE"
-fi
-alias mktmp="mktemp"
-alias tmpdir="f(){ export TMPDIR="$(mktemp -d)"; echo \"$TMPDIR\" > \"$TMPFILE\"; cd \"$(cat $TMPFILE)\" }; f || return 1;"
-alias tempdir="tmpdir"
-alias cdtmp='cd "$(cat $TMPFILE)" || return 1'
-alias cdtemp="cdtmp"
-alias echotmp='cat "$TMPFILE" || return 1'
-alias echotemp="echotmp"
-alias tm=tmux
 alias tmx=tmux
-alias tma=tmux attach
-alias tldr="tldr --color=always"
-alias py="python3"
-alias pip="python3 -m pip"
-alias el="elixir"
-alias elx="elixir"
-alias v="nvim"
-alias V="vim"
+alias tma="tmux attach"
 alias ct="cd /tmp"
-alias ovpn=openvpn
-alias man="man "
 
-ttok() {
-    # Check if the first argument is an existing file
-    if [ -f "$1" ]; then
-        python3 -c "import tiktoken; enc = tiktoken.encoding_for_model('gpt-4o'); print(len(enc.encode(open('$1', 'r', errors='ignore').read())))"
-    # Check if data is being piped (STDIN)
-    elif [ ! -t 0 ]; then
-        python3 -c "import sys, tiktoken; enc = tiktoken.encoding_for_model('gpt-4o'); print(len(enc.encode(sys.stdin.read())))"
-    # Otherwise, treat the input as a plain text string
-    elif [ -n "$*" ]; then
-        python3 -c "import tiktoken; enc = tiktoken.encoding_for_model('gpt-4o'); print(len(enc.encode('''$*''')))"
-    else
-        echo "Usage: count-tokens [filename | 'text string'] or pipe data into it."
-    fi
-}
+#############################################
+################ Keybindings ################
+#############################################
+# Emacs mode. Keep this first: EDITOR=nvim makes zsh start in vi mode,
+# and switching keymaps later would lose the bindings made before the switch.
+bindkey -e
 
-# Terminal Padding Keybindings
-remove_terminal_padding(){
-  sed -i -e 's/config.window_padding.left.*/config.window_padding.left = 0/' "$HOME/.config/wezterm/wezterm.lua"
-  sed -i -e 's/config.window_padding.right.*/config.window_padding.right = 0/' "$HOME/.config/wezterm/wezterm.lua"
-  sed -i -e 's/config.window_padding.top.*/config.window_padding.top = 0/' "$HOME/.config/wezterm/wezterm.lua"
-  sed -i -e 's/config.window_padding.bottom.*/config.window_padding.bottom = 0/' "$HOME/.config/wezterm/wezterm.lua"
-}
-add_terminal_padding(){
-  local px='"0.5cell"'
-  local py='"0.2cell"'
-  sed -i -e "s/config.window_padding.left.*/config.window_padding.left = $px/" "$HOME/.config/wezterm/wezterm.lua"
-  sed -i -e "s/config.window_padding.right.*/config.window_padding.right = $px/" "$HOME/.config/wezterm/wezterm.lua"
-  sed -i -e "s/config.window_padding.top.*/config.window_padding.top = $py/" "$HOME/.config/wezterm/wezterm.lua"
-  sed -i -e "s/config.window_padding.bottom.*/config.window_padding.bottom = $py/" "$HOME/.config/wezterm/wezterm.lua"
-}
-zle -N remove_terminal_padding
-zle -N add_terminal_padding
-bindkey -r '^\['
-bindkey -r '^\]'
-bindkey '^\[' remove_terminal_padding
-bindkey '^\]' add_terminal_padding
-
+# Move fzf file search from Ctrl-T to Ctrl-B
 bindkey -r '^T'
 bindkey '^b' fzf-file-widget
 
-# sesh zsh config
-function sesh-sessions() {
-  {
-    exec </dev/tty
-    exec <&1
-    local session
-    session=$(sesh list -t -c | fzf --height 40% --reverse --border-label ' sesh ' --border --prompt '⚡  ')
-    [[ -z "$session" ]] && return
-    sesh connect $session
-  }
+# Clear the screen with Alt-L instead of Ctrl-L
+bindkey '^[l' clear-screen && bindkey -r '^L'
+
+#############################################
+################# Functions #################
+#############################################
+# lf: cd into the last directory on quit
+lfcd() {
+  # `command` is needed in case `lfcd` is aliased to `lf`
+  cd "$(command lf -print-last-dir "$@")"
 }
-zle     -N             sesh-sessions
-bindkey -M emacs '\es' sesh-sessions
-bindkey -M vicmd '\es' sesh-sessions
-bindkey -M viins '\es' sesh-sessions
 
-# Emacs mode
-bindkey -e 
+# Define color functions
+black() { echo -e "$(tput setaf 0)$*$(tput sgr0)"; }
+red() { echo -e "$(tput setaf 1)$*$(tput sgr0)"; }
+green() { echo -e "$(tput setaf 2)$*$(tput sgr0)"; }
+yellow() { echo -e "$(tput setaf 3)$*$(tput sgr0)"; }
+blue() { echo -e "$(tput setaf 4)$*$(tput sgr0)"; }
+magenta() { echo -e "$(tput setaf 5)$*$(tput sgr0)"; }
+cyan() { echo -e "$(tput setaf 6)$*$(tput sgr0)"; }
+white() { echo -e "$(tput setaf 7)$*$(tput sgr0)"; }
 
-# open neovim (F12)
-open_neovim() {
-    # check if on real terminal or not
-    if [[ -z $STY ]]; then
-        nv
-    fi
-}
-zle -N open_neovim
-bindkey -r '\e[24~'
-bindkey '\e[24~' open_neovim
+bright_black() { echo -e "$(tput setaf 8)$*$(tput sgr0)"; }
+bright_red() { echo -e "$(tput setaf 9)$*$(tput sgr0)"; }
+bright_green() { echo -e "$(tput setaf 10)$*$(tput sgr0)"; }
+bright_yellow() { echo -e "$(tput setaf 11)$*$(tput sgr0)"; }
+bright_blue() { echo -e "$(tput setaf 12)$*$(tput sgr0)"; }
+bright_magenta() { echo -e "$(tput setaf 13)$*$(tput sgr0)"; }
+bright_cyan() { echo -e "$(tput setaf 14)$*$(tput sgr0)"; }
+bright_white() { echo -e "$(tput setaf 15)$*$(tput sgr0)"; }
 
-# zoxide init
+#############################################
+################### Tools ###################
+#############################################
+# Keep after compinit so zoxide completions work
 eval "$(zoxide init zsh)"
 
 export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
+eval "$(pyenv init - zsh)"
 
 # Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/swimmingpolar/.cache/lm-studio/bin"
-
-bindkey '^[l' clear-screen && bindkey -r '^L'
+path+=($HOME/.cache/lm-studio/bin)
 
 # Claude Code: use my claude.ai subscription by default
 claude() { env -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN claude "$@"; }

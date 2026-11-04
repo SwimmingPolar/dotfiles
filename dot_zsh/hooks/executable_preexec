@@ -1,7 +1,0 @@
-#!/bin/bash
-
-#example_hook(){
-#}
-
-# autoload -Uz add-zsh-hook
-# add-zsh-hook precmd example_hook
