@@ -91,7 +91,8 @@ export EZA_ICON_SPACING=2
 ################## Aliases ##################
 #############################################
 alias nv="nvim"
-alias l="eza -1"
+alias l="eza -1 --icons=always"
+alias ll="eza -1l --icons=always"
 alias bat="bat --style=full"
 alias ltree="eza --icons=always --tree"
 alias lt="ltree"
