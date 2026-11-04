@@ -1,8 +1,11 @@
 encryption = "age"
 
 [age]
-  identity = "~/.local/share/chezmoi/key.txt.age"
+  identity = "~/.config/chezmoi/key.txt"
   recipient = "age16fcxn6esef87uqh62de0mlqla7qpaapfd86r37v9c980pdgsvuwsvq6wsq"
 
 [data]
   private_ = false
+
+[diff]
+  pager = "git-split-diffs --color | less -RFX"
