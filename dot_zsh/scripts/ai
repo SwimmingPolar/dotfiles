@@ -19,6 +19,15 @@ _ai_system() {
     "Core utilities: $(ls --version >/dev/null 2>&1 && echo GNU || echo BSD)"
 }
 
+# Renders Markdown with glow, or prints it as is without glow.
+_ai_render() {
+  if command -v glow >/dev/null; then
+    glow -
+  else
+    cat
+  fi
+}
+
 ask() {
   jq --arg input "$*" '.defaults + .ask + {input: $input}' "$HOME/.zsh/scripts/ai.json" |
     curl -sS https://api.openai.com/v1/responses \
@@ -26,7 +35,7 @@ ask() {
       -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
       -d @- |
     jq -r '.error.message // (.output[] | select(.type == "message") | .content[0].text)' |
-    glow -
+    _ai_render
 }
 
 what() {
@@ -38,7 +47,7 @@ what() {
       -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
       -d @- |
     jq -r '.error.message // (.output[] | select(.type == "message") | .content[0].text)' |
-    glow -
+    _ai_render
 }
 
 # Prints a command and copies it; never runs it.
@@ -91,5 +100,5 @@ explain() {
       -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
       -d @- |
     jq -r "$filter" |
-    glow -
+    _ai_render
 }
