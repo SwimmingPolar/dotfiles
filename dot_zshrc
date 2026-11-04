@@ -91,9 +91,9 @@ export EZA_ICON_SPACING=2
 ################## Aliases ##################
 #############################################
 alias nv="nvim"
-alias l="eza -1 --icons=always"
-alias ll="eza -1l --icons=always"
-alias ltree="eza --icons=always --tree"
+alias l="eza -1 --icons=always --color=always"
+alias ll="eza -1l --icons=always --color=always"
+alias ltree="eza --icons=always --color=always --tree"
 alias lt="ltree"
 alias leetcode="nvim leetcode.nvim"
 alias czf="chezmoi forget"
