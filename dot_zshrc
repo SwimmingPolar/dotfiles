@@ -11,6 +11,9 @@ path=(
   $HOME/.zsh/scripts
 )
 
+# Keep non-executables in PATH dirs (json, md, subdirs) out of command completion
+setopt HASH_EXECUTABLES_ONLY
+
 # omz plugins configs mandatories
 zstyle :omz:plugins:ssh-agent ssh-add-args --apple-load-keychain
 
@@ -171,3 +174,6 @@ codex() {
     command codex "$@"
   fi
 }
+
+# AI commands
+source $HOME/.zsh/scripts/ai

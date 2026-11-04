@@ -1,0 +1,95 @@
+#!/bin/bash
+
+# Machine facts for command answers. No paths, usernames or env vars.
+_ai_system() {
+  local os shell=$(ps -p $$ -o comm=)
+  shell=${shell#-}
+  shell=${shell##*/}
+
+  if command -v sw_vers >/dev/null; then
+    os="$(sw_vers -productName) $(sw_vers -productVersion)"
+  elif [[ -r /etc/os-release ]]; then
+    os=$(. /etc/os-release && printf '%s' "$PRETTY_NAME")
+  fi
+
+  printf '%s\n' \
+    "OS: ${os:-$(uname -sr)}" \
+    "Architecture: $(uname -m)" \
+    "Shell: $("$shell" --version | head -1)" \
+    "Core utilities: $(ls --version >/dev/null 2>&1 && echo GNU || echo BSD)"
+}
+
+ask() {
+  jq --arg input "$*" '.defaults + .ask + {input: $input}' "$HOME/.zsh/scripts/ai.json" |
+    curl -sS https://api.openai.com/v1/responses \
+      -H 'Content-Type: application/json' \
+      -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
+      -d @- |
+    jq -r '.error.message // (.output[] | select(.type == "message") | .content[0].text)' |
+    glow -
+}
+
+what() {
+  jq --arg input "$*" --arg system "$(_ai_system)" \
+    '.defaults + .what + {input: $input} | .instructions += "\n\nEnvironment:\n" + $system' \
+    "$HOME/.zsh/scripts/ai.json" |
+    curl -sS https://api.openai.com/v1/responses \
+      -H 'Content-Type: application/json' \
+      -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
+      -d @- |
+    jq -r '.error.message // (.output[] | select(.type == "message") | .content[0].text)' |
+    glow -
+}
+
+# Prints a command and copies it; never runs it.
+how() {
+  local filter='
+    if .error then
+      .error.message + "\n" | halt_error
+    else
+      .output[] | select(.type == "message") | .content[0].text | fromjson.command
+    end
+  '
+
+  local cmd
+  cmd=$(jq --arg input "$*" --arg system "$(_ai_system)" \
+    '.defaults + .how + {input: $input} | .instructions += "\n\nEnvironment:\n" + $system' \
+    "$HOME/.zsh/scripts/ai.json" |
+    curl -sS https://api.openai.com/v1/responses \
+      -H 'Content-Type: application/json' \
+      -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
+      -d @- |
+    jq -r "$filter")
+
+  [[ -n $cmd ]] || return 1
+  printf '%s\n' "$cmd"
+  printf '%s' "$cmd" | pbcopy
+}
+
+# Input: arguments, else a pipe, else the clipboard.
+explain() {
+  local input=${*:-$([[ -t 0 ]] && pbpaste || cat)}
+
+  local filter='
+    .error.message //
+    (
+      .output[]
+      | select(.type == "message")
+      | .content[0].text
+      | fromjson
+      | "## `\(.command)` - \(.description)\n",
+        (.options[] | "- `\(.option)` - \(.explanation)"),
+        "\n\(.summary)"
+    )
+  '
+
+  jq --arg input "$input" --arg system "$(_ai_system)" \
+    '.defaults + .explain + {input: $input} | .instructions += "\n\nEnvironment:\n" + $system' \
+    "$HOME/.zsh/scripts/ai.json" |
+    curl -sS https://api.openai.com/v1/responses \
+      -H 'Content-Type: application/json' \
+      -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
+      -d @- |
+    jq -r "$filter" |
+    glow -
+}

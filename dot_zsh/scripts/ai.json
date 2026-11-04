@@ -1,0 +1,62 @@
+{
+  "defaults": {
+    "model": "gpt-6-luna",
+    "reasoning": {"effort": "low"}
+  },
+  "ask": {
+    "instructions": "Answer simply and concisely. Format the answer in Markdown."
+  },
+  "what": {
+    "instructions": "Answer in the context of the command line in the environment below. Be concise. Format the answer in Markdown."
+  },
+  "how": {
+    "instructions": "Give one command for the environment below that does what is asked. No explanation.",
+    "text": {
+      "format": {
+        "type": "json_schema",
+        "name": "how",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "required": ["command"],
+          "additionalProperties": false,
+          "properties": {
+            "command": {"type": "string"}
+          }
+        }
+      }
+    }
+  },
+  "explain": {
+    "instructions": "Explain this shell command for the environment below. command is the program name, options lists each option or argument, summary says what the whole command does. One short line each.",
+    "text": {
+      "format": {
+        "type": "json_schema",
+        "name": "explain",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "required": ["command", "description", "options", "summary"],
+          "additionalProperties": false,
+          "properties": {
+            "command": {"type": "string"},
+            "description": {"type": "string"},
+            "summary": {"type": "string"},
+            "options": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["option", "explanation"],
+                "additionalProperties": false,
+                "properties": {
+                  "option": {"type": "string"},
+                  "explanation": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
