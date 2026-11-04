@@ -130,7 +130,7 @@ lfcd() {
   cd "$(command lf -print-last-dir "$@")"
 }
 
-# cdpr
+# cdpr: cd to the outermost git project root
 source $HOME/.zsh/scripts/cdpr
 
 # Define color functions
@@ -177,5 +177,5 @@ codex() {
   fi
 }
 
-# AI commands
+# AI commands: ask, how, what, explain
 source $HOME/.zsh/scripts/ai
