@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
 # Forgets files deleted locally, picks up new files in the dirs below, then
