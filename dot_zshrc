@@ -121,6 +121,10 @@ bindkey '^b' fzf-file-widget
 # Clear the screen with Alt-L instead of Ctrl-L
 bindkey '^[l' clear-screen && bindkey -r '^L'
 
+# Clear the line with Ctrl-U and copy it to the clipboard
+source $HOME/.zsh/scripts/kill_line_copy
+bindkey '^u' kill_line_copy
+
 #############################################
 ################# Functions #################
 #############################################

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Clear the current line and copy it to the clipboard.
+# An empty line leaves the clipboard alone.
+kill_line_copy() {
+  [[ -n ${BUFFER//[[:space:]]/} ]] || { zle kill-whole-line; return; }
+  zle kill-whole-line
+  print -rn -- "${CUTBUFFER%$'\n'}" | pbcopy
+}
+zle -N kill_line_copy
