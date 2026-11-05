@@ -1,10 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-# Forgets files deleted locally, picks up new files in the dirs below, then
-# updates modified managed files (re-add keeps encrypted files encrypted).
-# Public repo, plain only: no credentials in these. ~/.env is deliberately left
-# out; add new keys there with `chezmoi add --encrypt`.
 plain=(
   "$HOME/.config/bat"
   "$HOME/.config/color.palette"
@@ -16,7 +12,6 @@ plain=(
   "$HOME/.zsh"
 )
 
-# DA = deleted locally. Children sort first so a dir is forgotten after its files.
 chezmoi status | sed -n 's/^DA //p' | sort -r |
   while IFS= read -r path; do
     echo "forget: $path"

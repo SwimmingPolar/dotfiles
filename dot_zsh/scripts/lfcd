@@ -1,5 +1,4 @@
 #!/bin/bash
-# Sourced from ~/.zshrc, not executed: a child process can't cd the shell.
 
 # lf: cd into the last directory on quit
 lfcd() {

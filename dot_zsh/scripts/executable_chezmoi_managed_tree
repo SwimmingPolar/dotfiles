@@ -1,8 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-# .chezmoiignore is already respected by `chezmoi managed`
-
 # Directories managed by chezmoi that should be shown,
 # but not expanded in the tree
 do_not_expand=(
