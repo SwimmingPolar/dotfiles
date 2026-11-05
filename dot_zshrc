@@ -178,4 +178,4 @@ codex() {
 }
 
 # AI commands: ask, how, what, explain
-source $HOME/.zsh/scripts/ai
+source $HOME/.zsh/scripts/ai/ai
