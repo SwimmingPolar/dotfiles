@@ -1,0 +1,8 @@
+#!/bin/bash
+# Sourced from ~/.zshrc, not executed: a child process can't cd the shell.
+
+# lf: cd into the last directory on quit
+lfcd() {
+  # `command` is needed in case `lfcd` is aliased to `lf`
+  cd "$(command lf -print-last-dir "$@")"
+}

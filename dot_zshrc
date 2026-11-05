@@ -125,10 +125,7 @@ bindkey '^[l' clear-screen && bindkey -r '^L'
 ################# Functions #################
 #############################################
 # lf: cd into the last directory on quit
-lfcd() {
-  # `command` is needed in case `lfcd` is aliased to `lf`
-  cd "$(command lf -print-last-dir "$@")"
-}
+source $HOME/.zsh/scripts/lfcd
 
 # cdpr: cd to the outermost git project root
 source $HOME/.zsh/scripts/cdpr
