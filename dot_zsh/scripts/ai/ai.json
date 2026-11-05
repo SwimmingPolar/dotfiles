@@ -1,6 +1,7 @@
 {
   "defaults": {
     "model": "gpt-6-luna",
+    "service_tier": "fast",
     "reasoning": {"effort": "low"}
   },
   "ask": {
