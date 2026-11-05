@@ -1,3 +1,4 @@
+#!/bin/bash
 # Sourced from ~/.zshrc, not executed: a child process can't cd the shell.
 
 # cd to the outermost git project root, walking up through nested repos.
@@ -7,11 +8,11 @@ cdpr() {
   while top=$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null) && [[ -n $top ]]; do
     root=$top
     [[ $top == / ]] && break
-    dir=${top:h}
+    dir=$(dirname "$top")
   done
 
   if [[ -z $root ]]; then
-    print -u2 "cdpr: not inside a git project"
+    echo "cdpr: not inside a git project" >&2
     return 1
   fi
 
