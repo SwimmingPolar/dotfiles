@@ -1,8 +1,8 @@
 {
   "defaults": {
-    "model": "gpt-6-luna",
+    "model": "gpt-6-astra",
     "service_tier": "fast",
-    "reasoning": {"effort": "low"}
+    "reasoning": { "effort": "low" }
   },
   "ask": {
     "instructions": "Answer simply and concisely. Format the answer in Markdown."
@@ -22,7 +22,7 @@
           "required": ["command"],
           "additionalProperties": false,
           "properties": {
-            "command": {"type": "string"}
+            "command": { "type": "string" }
           }
         }
       }
@@ -40,9 +40,9 @@
           "required": ["command", "description", "options", "summary"],
           "additionalProperties": false,
           "properties": {
-            "command": {"type": "string"},
-            "description": {"type": "string"},
-            "summary": {"type": "string"},
+            "command": { "type": "string" },
+            "description": { "type": "string" },
+            "summary": { "type": "string" },
             "options": {
               "type": "array",
               "items": {
@@ -50,8 +50,8 @@
                 "required": ["option", "explanation"],
                 "additionalProperties": false,
                 "properties": {
-                  "option": {"type": "string"},
-                  "explanation": {"type": "string"}
+                  "option": { "type": "string" },
+                  "explanation": { "type": "string" }
                 }
               }
             }
