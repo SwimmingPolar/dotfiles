@@ -28,8 +28,14 @@ _ai_render() {
   fi
 }
 
+# Input: arguments, else redirected standard input (a pipe or heredoc).
 ask() {
-  jq --arg input "$*" '.defaults + .ask + {input: $input}' "$HOME/.zsh/scripts/ai/ai.json" |
+  local input="$*"
+  if [[ $# -eq 0 && ! -t 0 ]]; then
+    input=$(cat) || return
+  fi
+
+  jq --arg input "$input" '.defaults + .ask + {input: $input}' "$HOME/.zsh/scripts/ai/ai.json" |
     curl -sS https://api.openai.com/v1/responses \
       -H 'Content-Type: application/json' \
       -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
