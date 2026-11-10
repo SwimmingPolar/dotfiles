@@ -1,0 +1,136 @@
+#!/usr/bin/python3
+"""Read-only health check for the local X-only sing-box LaunchDaemon."""
+import argparse
+from concurrent.futures import ThreadPoolExecutor
+import ipaddress
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+BASE = Path.home() / '.config/sing-box'
+SERVICE = 'system/local.sing-box.x-only'
+
+
+def command(args, timeout=5):
+    try:
+        return subprocess.run(args, capture_output=True, text=True, timeout=timeout)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        return subprocess.CompletedProcess(args, 1, '', str(error))
+
+
+def mapped(address, networks):
+    try:
+        return any(ipaddress.ip_address(address) in network for network in networks)
+    except ValueError:
+        return False
+
+
+def probe(label, url, use_tunnel, networks, timeout):
+    # Ignore curlrc and proxy environment settings: test the Mac's actual route.
+    result = command([
+        '/usr/bin/curl', '--disable', '--noproxy', '*', '--silent', '--show-error',
+        '--connect-timeout', str(min(5, timeout)), '--max-time', str(timeout),
+        '--output', '/dev/null', '--write-out', '%{http_code}\t%{remote_ip}\t%{time_total}',
+        url,
+    ], timeout=timeout + 2)
+    if result.returncode:
+        detail = ' '.join(result.stderr.split())[:240]
+        return 'FAIL', label + ': ' + (detail or 'HTTPS request failed'), None
+    try:
+        code, address, elapsed = result.stdout.strip().split('\t')
+        code = int(code)
+        duration = float(elapsed)
+    except ValueError:
+        return 'FAIL', label + ': could not read the HTTPS result', None
+    if mapped(address, networks) != use_tunnel:
+        expected = 'a tunnel mapping' if use_tunnel else 'a real destination address'
+        return 'FAIL', label + ': connected to ' + address + '; expected ' + expected, None
+    route = command(['/sbin/route', '-n', 'get', address])
+    interface = re.search(r'^\s*interface:\s*(\S+)', route.stdout, re.MULTILINE)
+    if route.returncode or not interface:
+        return 'FAIL', label + ': could not verify the route for ' + address, None
+    interface = interface.group(1)
+    if use_tunnel and not interface.startswith('utun'):
+        return 'FAIL', label + ': tunnel mapping routed through ' + interface, interface
+    detail = '{}: HTTPS {}, {} via {}, {:.2f}s'.format(label, code, address, interface, duration)
+    if 200 <= code < 400:
+        return 'PASS', detail, interface
+    # An HTTP error still proves TLS connectivity, but not normal site operation.
+    return 'WARN', detail + ' (connected; site returned an error)', interface
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, epilog='Exit codes: 0 healthy; 1 failed; 2 connected but site returned an HTTP error. Does not change networking or start/stop the service.')
+    parser.add_argument('--timeout', type=int, default=12, metavar='SECONDS', help='maximum time per HTTPS request (default: 12)')
+    args = parser.parse_args()
+    if args.timeout < 1:
+        parser.error('--timeout must be positive')
+    results = []
+
+    def report(level, text):
+        results.append(level)
+        print('[{}] {}'.format(level, text), flush=True)
+
+    try:
+        config = json.loads((BASE / 'config.json').read_text())
+        fakeip = next(server for server in config['dns']['servers'] if server['type'] == 'fakeip')
+        networks = [ipaddress.ip_network(fakeip[key]) for key in ('inet4_range', 'inet6_range') if key in fakeip]
+        tun = next(inbound for inbound in config['inbounds'] if inbound['type'] == 'tun')
+        dns_address = next(str(ipaddress.ip_interface(address).ip + 1) for address in tun['address'] if ipaddress.ip_interface(address).version == 4)
+        if not networks:
+            raise ValueError('No mapping ranges')
+    except (OSError, ValueError, KeyError, TypeError, StopIteration):
+        report('FAIL', 'Cannot read the expected sing-box configuration: ' + str(BASE / 'config.json'))
+        return 1
+
+    service = command(['/bin/launchctl', 'print', SERVICE])
+    try:
+        runtime = json.loads((BASE / 'runtime.json').read_text())
+        runner_pid, child_pid = int(runtime['runner_pid']), int(runtime['sing_box_pid'])
+        runner = command(['/bin/ps', '-p', str(runner_pid), '-o', 'args='])
+        child = command(['/bin/ps', '-p', str(child_pid), '-o', 'ppid=,args='])
+        service_pid = re.search(r'^\s*pid = (\d+)\s*$', service.stdout, re.MULTILINE)
+        running = service.returncode == 0 and service_pid and int(service_pid.group(1)) == runner_pid
+        running = running and str(BASE / 'x-tunnel') + ' run' in runner.stdout
+        child_fields = child.stdout.strip().split(None, 1)
+        running = running and len(child_fields) == 2 and child_fields[0] == str(runner_pid)
+        running = running and child_fields[1] == '/opt/homebrew/bin/sing-box run -c ' + str(BASE / 'config.json')
+    except (OSError, ValueError, KeyError, TypeError):
+        running = False
+    if running:
+        report('PASS', 'Service running (helper PID {}, sing-box PID {})'.format(runner_pid, child_pid))
+    else:
+        report('FAIL', 'Service is stopped, missing, or its recorded processes do not match')
+
+    dns = command(['/usr/sbin/scutil', '--dns'])
+    first = re.search(r'nameserver\[0\]\s*:\s*(\S+)', dns.stdout)
+    current = first.group(1) if first else 'unavailable'
+    report('PASS' if dns.returncode == 0 and current == dns_address else 'FAIL',
+           'System DNS: {} (expected {})'.format(current, dns_address))
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        selected = pool.submit(probe, 'X through tunnel', 'https://x.com/', True, networks, args.timeout)
+        direct = pool.submit(probe, 'Direct Internet', 'https://example.com/', False, networks, args.timeout)
+        selected_result, direct_result = selected.result(), direct.result()
+    for level, detail, _ in (selected_result, direct_result):
+        report(level, detail)
+    if selected_result[2] and direct_result[2] == selected_result[2]:
+        report('FAIL', 'Unrelated traffic is using the same tunnel interface as X')
+
+    print()
+    if 'FAIL' in results:
+        print('UNHEALTHY: one or more checks failed. No settings were changed.')
+        print('Service status: ~/.config/sing-box/x-tunnel status')
+        print('Log: ' + str(BASE / 'sing-box.log'))
+        return 1
+    if 'WARN' in results:
+        print('DEGRADED: routing and TLS connectivity worked, but a site returned an HTTP error.')
+        return 2
+    print('HEALTHY: service, system DNS, tunneled HTTPS, and direct HTTPS passed.')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
