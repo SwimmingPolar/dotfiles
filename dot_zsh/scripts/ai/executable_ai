@@ -44,8 +44,14 @@ ask() {
     _ai_render
 }
 
+# Input: arguments, else redirected standard input (a pipe or heredoc).
 what() {
-  jq --arg input "$*" --arg system "$(_ai_system)" \
+  local input="$*"
+  if [[ $# -eq 0 && ! -t 0 ]]; then
+    input=$(cat) || return
+  fi
+
+  jq --arg input "$input" --arg system "$(_ai_system)" \
     '.defaults + .what + {input: $input} | .instructions += "\n\nEnvironment:\n" + $system' \
     "$HOME/.zsh/scripts/ai/ai.json" |
     curl -sS https://api.openai.com/v1/responses \
@@ -57,7 +63,13 @@ what() {
 }
 
 # Prints a command and copies it; never runs it.
+# Input: arguments, else redirected standard input (a pipe or heredoc).
 how() {
+  local input="$*"
+  if [[ $# -eq 0 && ! -t 0 ]]; then
+    input=$(cat) || return
+  fi
+
   local filter='
     if .error then
       .error.message + "\n" | halt_error
@@ -67,7 +79,7 @@ how() {
   '
 
   local cmd
-  cmd=$(jq --arg input "$*" --arg system "$(_ai_system)" \
+  cmd=$(jq --arg input "$input" --arg system "$(_ai_system)" \
     '.defaults + .how + {input: $input} | .instructions += "\n\nEnvironment:\n" + $system' \
     "$HOME/.zsh/scripts/ai/ai.json" |
     curl -sS https://api.openai.com/v1/responses \
@@ -81,9 +93,16 @@ how() {
   printf '%s' "$cmd" | pbcopy
 }
 
-# Input: arguments, else a pipe, else the clipboard.
+# Input: arguments, else redirected standard input, else the clipboard.
 explain() {
-  local input=${*:-$([[ -t 0 ]] && pbpaste || cat)}
+  local input="$*"
+  if [[ $# -eq 0 ]]; then
+    if [[ -t 0 ]]; then
+      input=$(pbpaste) || return
+    else
+      input=$(cat) || return
+    fi
+  fi
 
   local filter='
     .error.message //
