@@ -8,3 +8,13 @@ kill_line_copy() {
   print -rn -- "${CUTBUFFER%$'\n'}" | pbcopy
 }
 zle -N kill_line_copy
+
+# Delete the previous word and copy it to the clipboard.
+# Empty or whitespace-only text before the cursor leaves the clipboard alone.
+kill_word_copy() {
+  [[ -n ${LBUFFER//[[:space:]]/} ]] || { zle backward-kill-word; return; }
+  zle backward-kill-word
+  print -rn -- "$CUTBUFFER" | pbcopy
+}
+zle -N kill_word_copy
+bindkey '^w' kill_word_copy
