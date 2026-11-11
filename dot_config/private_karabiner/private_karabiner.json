@@ -1,5 +1,8 @@
 {
-    "global": { "show_in_menu_bar": false },
+    "global": {
+        "check_for_updates": false,
+        "show_in_menu_bar": false
+    },
     "profiles": [
         {
             "complex_modifications": {
@@ -195,9 +198,7 @@
                                     "key_code": "escape",
                                     "modifiers": { "optional": ["caps_lock"] }
                                 },
-                                "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 150
-                                },
+                                "parameters": { "basic.to_delayed_action_delay_milliseconds": 150 },
                                 "to": [
                                     {
                                         "set_variable": {
@@ -299,9 +300,7 @@
                                     "key_code": "escape",
                                     "modifiers": { "optional": ["caps_lock"] }
                                 },
-                                "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 150
-                                },
+                                "parameters": { "basic.to_delayed_action_delay_milliseconds": 150 },
                                 "to": [
                                     {
                                         "set_variable": {
