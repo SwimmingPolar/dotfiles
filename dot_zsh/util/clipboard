@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Clear the current line and copy it to the clipboard.
 # An empty line leaves the clipboard alone.
 kill_line_copy() {

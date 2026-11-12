@@ -122,17 +122,17 @@ bindkey '^b' fzf-file-widget
 bindkey '^[l' clear-screen && bindkey -r '^L'
 
 # Clear the line with Ctrl-U and copy it to the clipboard
-source $HOME/.zsh/scripts/kill_line_copy
+source "$HOME/.zsh/util/clipboard"
 bindkey '^u' kill_line_copy
 
 #############################################
 ################# Functions #################
 #############################################
 # lf: cd into the last directory on quit
-source $HOME/.zsh/scripts/lfcd
+source "$HOME/.zsh/util/lfcd"
 
 # cdpr: cd to the outermost git project root
-source $HOME/.zsh/scripts/cdpr
+source "$HOME/.zsh/util/cdpr"
 
 # Define color functions
 black() { echo -e "$(tput setaf 0)$*$(tput sgr0)"; }
@@ -179,4 +179,4 @@ codex() {
 }
 
 # AI commands: ask, how, what, explain
-source $HOME/.zsh/scripts/ai/ai
+source "$HOME/.zsh/util/ai/ai"

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Machine facts for command answers. No paths, usernames or env vars.
 _ai_system() {
   local os shell=$(ps -p $$ -o comm=)
@@ -35,7 +33,7 @@ ask() {
     input=$(cat) || return
   fi
 
-  jq --arg input "$input" '.defaults + .ask + {input: $input}' "$HOME/.zsh/scripts/ai/ai.json" |
+  jq --arg input "$input" '.defaults + .ask + {input: $input}' "$HOME/.zsh/util/ai/ai.json" |
     curl -sS https://api.openai.com/v1/responses \
       -H 'Content-Type: application/json' \
       -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
@@ -53,7 +51,7 @@ what() {
 
   jq --arg input "$input" --arg system "$(_ai_system)" \
     '.defaults + .what + {input: $input} | .instructions += "\n\nEnvironment:\n" + $system' \
-    "$HOME/.zsh/scripts/ai/ai.json" |
+    "$HOME/.zsh/util/ai/ai.json" |
     curl -sS https://api.openai.com/v1/responses \
       -H 'Content-Type: application/json' \
       -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
@@ -81,7 +79,7 @@ how() {
   local cmd
   cmd=$(jq --arg input "$input" --arg system "$(_ai_system)" \
     '.defaults + .how + {input: $input} | .instructions += "\n\nEnvironment:\n" + $system' \
-    "$HOME/.zsh/scripts/ai/ai.json" |
+    "$HOME/.zsh/util/ai/ai.json" |
     curl -sS https://api.openai.com/v1/responses \
       -H 'Content-Type: application/json' \
       -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
@@ -119,7 +117,7 @@ explain() {
 
   jq --arg input "$input" --arg system "$(_ai_system)" \
     '.defaults + .explain + {input: $input} | .instructions += "\n\nEnvironment:\n" + $system' \
-    "$HOME/.zsh/scripts/ai/ai.json" |
+    "$HOME/.zsh/util/ai/ai.json" |
     curl -sS https://api.openai.com/v1/responses \
       -H 'Content-Type: application/json' \
       -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # lf: cd into the last directory on quit
 lfcd() {
   # `command` is needed in case `lfcd` is aliased to `lf`
