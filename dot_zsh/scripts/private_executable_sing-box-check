@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Read-only health check for the local X-only sing-box LaunchDaemon."""
+"""Read-only health check for the local OCI split-tunnel LaunchDaemon."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import ipaddress
@@ -110,14 +110,16 @@ def main():
     report('PASS' if dns.returncode == 0 and current == dns_address else 'FAIL',
            'System DNS: {} (expected {})'.format(current, dns_address))
 
-    with ThreadPoolExecutor(max_workers=2) as pool:
+    with ThreadPoolExecutor(max_workers=3) as pool:
         selected = pool.submit(probe, 'X through tunnel', 'https://x.com/', True, networks, args.timeout)
+        polymarket = pool.submit(probe, 'Polymarket through tunnel', 'https://polymarket.com/', True, networks, args.timeout)
         direct = pool.submit(probe, 'Direct Internet', 'https://example.com/', False, networks, args.timeout)
-        selected_result, direct_result = selected.result(), direct.result()
-    for level, detail, _ in (selected_result, direct_result):
+        selected_result, polymarket_result, direct_result = selected.result(), polymarket.result(), direct.result()
+    for level, detail, _ in (selected_result, polymarket_result, direct_result):
         report(level, detail)
-    if selected_result[2] and direct_result[2] == selected_result[2]:
-        report('FAIL', 'Unrelated traffic is using the same tunnel interface as X')
+    tunnel_interfaces = {result[2] for result in (selected_result, polymarket_result) if result[2]}
+    if direct_result[2] and direct_result[2] in tunnel_interfaces:
+        report('FAIL', 'Unrelated traffic is using the same interface as tunneled traffic')
 
     print()
     if 'FAIL' in results:
