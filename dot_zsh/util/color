@@ -1,0 +1,40 @@
+# Sourced by ~/.zshrc. Accept arguments or, with no arguments, read stdin.
+# Examples: red "error"; printf 'warning\n' | yellow
+_zsh_color() {
+  emulate -L zsh
+  local color=$1
+  shift
+
+  local prefix reset exit_code=0
+  prefix=$(command tput setaf "$color" 2>/dev/null) || prefix=''
+  reset=$(command tput sgr0 2>/dev/null) || reset=''
+
+  if (( $# )); then
+    printf '%s%s%s\n' "$prefix" "$*" "$reset"
+  elif [[ ! -t 0 ]]; then
+    printf '%s' "$prefix"
+    command cat || exit_code=$?
+    printf '%s' "$reset"
+    return "$exit_code"
+  else
+    printf '%s%s\n' "$prefix" "$reset"
+  fi
+}
+
+black() { _zsh_color 0 "$@"; }
+red() { _zsh_color 1 "$@"; }
+green() { _zsh_color 2 "$@"; }
+yellow() { _zsh_color 3 "$@"; }
+blue() { _zsh_color 4 "$@"; }
+magenta() { _zsh_color 5 "$@"; }
+cyan() { _zsh_color 6 "$@"; }
+white() { _zsh_color 7 "$@"; }
+
+bright_black() { _zsh_color 8 "$@"; }
+bright_red() { _zsh_color 9 "$@"; }
+bright_green() { _zsh_color 10 "$@"; }
+bright_yellow() { _zsh_color 11 "$@"; }
+bright_blue() { _zsh_color 12 "$@"; }
+bright_magenta() { _zsh_color 13 "$@"; }
+bright_cyan() { _zsh_color 14 "$@"; }
+bright_white() { _zsh_color 15 "$@"; }
