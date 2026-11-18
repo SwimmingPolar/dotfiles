@@ -1,6 +1,6 @@
 {
   "defaults": {
-    "model": "gpt-6-astra",
+    "model": "gpt-6.2-sol",
     "service_tier": "fast",
     "reasoning": { "effort": "low" }
   },
@@ -11,7 +11,7 @@
     "instructions": "Answer in the context of the command line in the environment below. Be concise. Format the answer in Markdown."
   },
   "how": {
-    "instructions": "Give one command for the environment below that does what is asked. No explanation.",
+    "instructions": "Give one pipe compatible command for the environment below that does what is asked. No explanation.",
     "text": {
       "format": {
         "type": "json_schema",
